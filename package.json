@@ -1,0 +1,16 @@
+{
+  "name": "solflip",
+  "version": "3.0.0",
+  "description": "SOL FLIP — Heads or Tails on Solana",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "setup": "node setup-treasury.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.4",
+    "bs58": "^4.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
