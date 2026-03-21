@@ -1,0 +1,14 @@
+{
+  "51BqQWM3HUS9GFTTSu4aGT9YVSEQE2efkwe131gaQvpv": {
+    "pubkey": "51BqQWM3HUS9GFTTSu4aGT9YVSEQE2efkwe131gaQvpv",
+    "firstSeen": "2026-03-13T02:20:47.243Z",
+    "lastSeen": "2026-03-13T02:21:02.374Z",
+    "totalFlips": 2,
+    "totalWins": 0,
+    "totalLosses": 2,
+    "totalWagered": 0.004,
+    "totalPayout": 0,
+    "netLoss": 0.004,
+    "banned": false
+  }
+}

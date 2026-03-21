@@ -1,0 +1,12 @@
+{
+  "network": "testnet",
+  "minBet": 0.001,
+  "maxBet": 0.5,
+  "houseEdge": 0.04,
+  "gameEnabled": true,
+  "adminPassword": "admin123",
+  "flipMode": "auto_heads",
+  "manualNextResult": null,
+  "maxPlayersOnline": 1000,
+  "sessionTimeoutMin": 60
+}
