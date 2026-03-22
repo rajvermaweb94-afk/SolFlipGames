@@ -1570,32 +1570,19 @@ header {
 </script>
 <script>
 const SERVER = '';
-const RPC_LIST = [
-  'https://api.testnet.solana.com',
-  'https://testnet.solana.com',
-  'https://rpc.testnet.solana.com',
-];
-let rpcIndex = 0;
+let rpcUrl = null;
 let conn = null;
 
 function C() {
-  if (!conn && window.solanaWeb3)
-    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
-  return conn;
-}
-
-function nextRPC() {
-  rpcIndex = (rpcIndex + 1) % RPC_LIST.length;
-  console.log('Switching RPC to:', RPC_LIST[rpcIndex]);
-  if (window.solanaWeb3)
-    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
+  if (!conn && rpcUrl && window.solanaWeb3)
+    conn = new solanaWeb3.Connection(rpcUrl, 'confirmed');
   return conn;
 }
 
 /* ── State ── */
 let wallet = null, wBal = 0;
 let side = 'heads', busy = false;
-let treasury = null, network = 'testnet';
+let treasury = null, network = '';
 let totalFlips = 0, totalWins = 0, pnl = 0;
 let hist = [];
 
@@ -1640,7 +1627,15 @@ async function boot() {
     if (d.ok) {
       treasury = d.treasuryPubkey;
       network  = d.network;
-      document.getElementById('netLabel').textContent = d.network.toUpperCase();
+      // Update RPC connection from server
+      if (d.rpcUrl && d.rpcUrl !== rpcUrl) {
+        rpcUrl = d.rpcUrl;
+        if (window.solanaWeb3) {
+          conn = new solanaWeb3.Connection(rpcUrl, 'confirmed');
+          console.log('RPC set from server:', rpcUrl.replace(/api[-_]?key[=:][^&]+/i, 'api-key=***'));
+        }
+      }
+      document.getElementById('netLabel').textContent = d.network === 'mainnet-beta' ? 'MAINNET' : d.network.toUpperCase();
     }
   } catch(e) {}
 }
@@ -1709,7 +1704,7 @@ async function doConnect(provider) {
     btn.classList.add('on');
     document.getElementById('flipBtn').disabled = false;
     document.getElementById('flipBtn').textContent = 'FLIP';
-    document.getElementById('balHint').textContent = network + ' balance';
+    document.getElementById('balHint').textContent = (network === 'mainnet-beta' ? 'Mainnet' : network) + ' balance';
     closeWM();
     updateMyHistVisibility();
     toast('Wallet connected', 'ok');

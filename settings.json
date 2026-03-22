@@ -1,0 +1,13 @@
+{
+  "network": "mainnet-beta",
+  "minBet": 0.001,
+  "maxBet": 0.005,
+  "houseEdge": 0.04,
+  "gameEnabled": true,
+  "adminPassword": "admin123",
+  "flipMode": "random",
+  "manualNextResult": "heads",
+  "maxPlayersOnline": 1000,
+  "sessionTimeoutMin": 60,
+  "lowBalanceThreshold": 0.1
+}

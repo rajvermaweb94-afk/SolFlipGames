@@ -56,7 +56,7 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ── Default settings ──────────────────────────────────────
 const DEFAULT_SETTINGS = {
-  network:         "testnet",
+  network:         "mainnet-beta",
   minBet:          0.001,
   maxBet:          0.5,
   houseEdge:       0.04,
@@ -329,7 +329,8 @@ app.get("/api/status", async (req, res) => {
   try {
     const active  = getActiveWallet();
     const keypair = getActiveKeypair();
-    const balance = await connection.getBalance(keypair.publicKey);
+    let balance = 0;
+    try { balance = await connection.getBalance(keypair.publicKey); } catch(e) { /* RPC may be slow */ }
     const winMult = 2 * (1 - settings.houseEdge);
     res.json({
       ok:              true,
