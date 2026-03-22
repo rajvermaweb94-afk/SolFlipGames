@@ -173,23 +173,24 @@ header {
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 
 /* ════════════════════════════════
    LEFT COLUMN
 ════════════════════════════════ */
-.left { display:flex; flex-direction:column; gap:18px; }
+.left { display:flex; flex-direction:column; gap:0; }
 
 /* Quick Stats */
 .quick-stats {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
 }
 .qs-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 12px; padding: 14px 16px;
+  border-radius: 10px; padding: 10px 10px;
   position: relative; overflow: hidden;
+  min-width: 0;
 }
 .qs-card::before {
   content:''; position:absolute; top:0; left:0; right:0; height:1px;
@@ -197,14 +198,19 @@ header {
 }
 .qs-val {
   font-family: 'Unbounded', sans-serif;
-  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
   font-weight: 700; line-height: 1; color: var(--g3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .qs-lbl {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.58rem; color: var(--t3);
-  letter-spacing: 0.1em; text-transform: uppercase;
-  margin-top: 5px;
+  font-size: 0.52rem; color: var(--t3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-top: 4px;
+}
+/* Desktop: hide quick-stats from left column (moved to right) */
+@media (min-width: 901px) {
+  .left .quick-stats { display: none; }
 }
 
 /* ─── COIN STAGE ─── */
@@ -212,11 +218,14 @@ header {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 20px;
-  padding: clamp(28px, 5vw, 52px) 24px;
+  padding: clamp(20px, 3vw, 36px) 24px;
   display: flex; flex-direction: column;
-  align-items: center; gap: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
   position: relative; overflow: hidden;
-  min-height: 420px;
+  min-height: 0;
+  flex: 1;
 }
 .coin-stage::before {
   content:''; position:absolute; inset:0;
@@ -333,11 +342,14 @@ header {
   position: absolute; inset: 0; pointer-events: none; border-radius: 20px;
 }
 
-/* ─── HISTORY ─── */
+/* ─── HISTORY (left column — hidden on desktop) ─── */
 .history-panel {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 16px; padding: 18px;
+}
+@media (min-width: 901px) {
+  .history-panel { display: none; }
 }
 .section-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -641,13 +653,136 @@ header {
 .toast.err { border-color:rgba(239,68,68,0.3); color:var(--r3); }
 
 /* ════════════════════════════════
+   LIVE TICKER STRIP
+════════════════════════════════ */
+.live-ticker {
+  position: relative; z-index: 99;
+  width: 100%;
+  background: rgba(6,8,16,0.75);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+.live-indicator {
+  position: absolute; left: 0; top: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px;
+  background: linear-gradient(90deg, rgba(6,8,16,0.95) 70%, transparent 100%);
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.55rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--r2);
+  white-space: nowrap;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--r2);
+  animation: livePulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(239,68,68,0.6);
+}
+@keyframes livePulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.4; transform:scale(0.6); }
+}
+.ticker-track {
+  display: flex; align-items: center; gap: 24px;
+  animation: tickerScroll 30s linear infinite;
+  padding-left: 80px;
+  white-space: nowrap;
+}
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+}
+.ticker-badge {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.5rem; font-weight: 900;
+  flex-shrink: 0;
+}
+.ticker-badge.tb-h {
+  background: linear-gradient(135deg, var(--g1), var(--g3));
+  color: #07050a;
+}
+.ticker-badge.tb-t {
+  background: linear-gradient(135deg, var(--e1), var(--e3));
+  color: #001008;
+}
+.ticker-addr { color: var(--t3); }
+.ticker-win  { color: var(--e4); font-weight: 600; }
+.ticker-loss { color: var(--r2); font-weight: 600; }
+.ticker-sep  { color: var(--t3); opacity: 0.3; font-size: 0.5rem; }
+
+/* ════════════════════════════════
+   FULL-WIDTH MY FLIP HISTORY
+════════════════════════════════ */
+.my-history-section {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 clamp(16px,4vw,48px) clamp(20px,3vw,40px);
+}
+.my-history-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px; padding: 18px;
+}
+/* My history table: center outcome, pad bet */
+.my-history-panel .hist-table td:first-child { padding-left: 14px; }
+.my-history-panel .hist-table th:first-child { padding-left: 14px; }
+.my-history-panel .hist-table td:nth-child(3),
+.my-history-panel .hist-table th:nth-child(3) { text-align: center; }
+.my-history-connect {
+  text-align: center; padding: 40px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; color: var(--t3);
+  letter-spacing: 0.06em;
+}
+.my-history-connect .mhc-icon {
+  font-size: 1.6rem; margin-bottom: 10px; opacity: 0.5;
+}
+.my-history-connect .mhc-text {
+  color: var(--t3);
+}
+.my-history-connect .mhc-btn {
+  display: inline-block; margin-top: 12px;
+  padding: 8px 18px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--g0), var(--g2), var(--g3));
+  color: #07050a; font-family: 'Unbounded', sans-serif;
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; border: none;
+  box-shadow: 0 2px 12px rgba(201,160,48,0.25);
+  transition: all 0.2s;
+}
+.my-history-connect .mhc-btn:hover {
+  box-shadow: 0 4px 20px rgba(201,160,48,0.4);
+  transform: translateY(-1px);
+}
+
+/* ════════════════════════════════
    RESPONSIVE
 ════════════════════════════════ */
 @media (max-width: 900px) {
-  .page { grid-template-columns: 1fr; }
-  .left { order:2; }
+  .page { grid-template-columns: 1fr; align-items: start; }
+  .left { order:2; gap: 18px; }
+  .left .quick-stats { display: grid; }
+  .left .history-panel { display: block; }
   .bet-panel { order:1; }
-  .coin-stage { padding: 28px 16px; min-height: 360px; }
+  .coin-stage { padding: 28px 16px; min-height: 360px; flex: unset; }
+  .live-ticker { display: none; }
+  .my-history-section { display: none; }
+  /* Hide desktop-only stats in right column on mobile */
+  .bet-panel .quick-stats { display: none; }
 }
 @media (max-width: 520px) {
   header { padding: 0 14px; }
@@ -690,24 +825,35 @@ header {
   </div>
 </header>
 
+<!-- ═══ LIVE TICKER ═══ -->
+<div class="live-ticker" id="liveTicker">
+  <div class="live-indicator">
+    <span class="live-dot"></span>
+    LIVE
+  </div>
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-item"><span class="ticker-addr" style="opacity:0.4">Waiting for flips…</span></span>
+  </div>
+</div>
+
 <!-- ═══ PAGE ═══ -->
 <div class="page">
 
   <!-- ═══ LEFT ═══ -->
   <div class="left">
 
-    <!-- Quick stats -->
+    <!-- Quick stats (visible on mobile only) -->
     <div class="quick-stats">
       <div class="qs-card">
-        <div class="qs-val" id="st-flips">0</div>
+        <div class="qs-val qs-val-flips">0</div>
         <div class="qs-lbl">Total Flips</div>
       </div>
       <div class="qs-card">
-        <div class="qs-val" id="st-wr" style="color:var(--t2)">—</div>
+        <div class="qs-val qs-val-wr" style="color:var(--t2)">—</div>
         <div class="qs-lbl">Win Rate</div>
       </div>
       <div class="qs-card">
-        <div class="qs-val" id="st-pnl" style="color:var(--t2)">±0.000</div>
+        <div class="qs-val qs-val-pnl" style="color:var(--t2)">±0.000</div>
         <div class="qs-lbl">P&amp;L (SOL)</div>
       </div>
     </div>
@@ -926,6 +1072,22 @@ header {
   <!-- ═══ RIGHT: BET PANEL ═══ -->
   <div class="bet-panel">
 
+    <!-- Stats (desktop) -->
+    <div class="quick-stats">
+      <div class="qs-card">
+        <div class="qs-val qs-val-flips">0</div>
+        <div class="qs-lbl">Total Flips</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-wr" style="color:var(--t2)">—</div>
+        <div class="qs-lbl">Win Rate</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-pnl" style="color:var(--t2)">±0.000</div>
+        <div class="qs-lbl">P&amp;L (SOL)</div>
+      </div>
+    </div>
+
     <!-- Balance -->
     <div class="glass-card">
       <div class="card-label">Balance</div>
@@ -1023,6 +1185,38 @@ header {
 
 </div><!-- /page -->
 
+<!-- ═══ FULL-WIDTH MY FLIP HISTORY ═══ -->
+<div class="my-history-section" id="myHistorySection">
+  <div class="my-history-panel">
+    <!-- When NOT connected -->
+    <div class="my-history-connect" id="myHistConnect">
+      <div class="mhc-icon">🔗</div>
+      <div class="mhc-text">Connect your wallet to see your flip history</div>
+      <button class="mhc-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+    <!-- When connected -->
+    <div id="myHistContent" style="display:none">
+      <div class="section-head">
+        <div class="section-title">My Flip History</div>
+        <button class="clear-btn" onclick="clearAll()">Clear</button>
+      </div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Bet</th>
+            <th>Pick → Result</th>
+            <th>Outcome</th>
+            <th style="text-align:right">P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="myHistBody">
+          <tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toastEl"></div>
 
 <script src="https://bundle.run/buffer@6.0.3"></script>
@@ -1044,12 +1238,25 @@ header {
 </script>
 <script>
 const SERVER = '';
-const RPC    = 'https://api.testnet.solana.com';
+const RPC_LIST = [
+  'https://api.testnet.solana.com',
+  'https://testnet.solana.com',
+  'https://rpc.testnet.solana.com',
+];
+let rpcIndex = 0;
 let conn = null;
 
 function C() {
   if (!conn && window.solanaWeb3)
-    conn = new solanaWeb3.Connection(RPC, 'confirmed');
+    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
+  return conn;
+}
+
+function nextRPC() {
+  rpcIndex = (rpcIndex + 1) % RPC_LIST.length;
+  console.log('Switching RPC to:', RPC_LIST[rpcIndex]);
+  if (window.solanaWeb3)
+    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
   return conn;
 }
 
@@ -1059,6 +1266,39 @@ let side = 'heads', busy = false;
 let treasury = null, network = 'testnet';
 let totalFlips = 0, totalWins = 0, pnl = 0;
 let hist = [];
+
+/* ── Fake wallet addresses for ticker ── */
+const FAKE_ADDRS = [
+  '7xKp…3mRz','BqF2…9wLt','Dk8N…4vPq','Hm3J…7cXs','Ry6W…2nBf',
+  'Uw9E…5aKd','Zp4T…8gMv','Cv1L…6hYn','Fg7Q…0jRt','Jn5A…1eSw',
+  'Lx2G…4bUo','Qs8D…3iCk','Tm6B…9fHl','Vo0Z…7dNp','Xk3M…2yJr',
+];
+function randomAddr() { return FAKE_ADDRS[Math.floor(Math.random()*FAKE_ADDRS.length)]; }
+function randomBet() { return [0.01,0.02,0.05,0.1,0.15,0.25][Math.floor(Math.random()*6)]; }
+
+function seedTicker() {
+  const seeds = [];
+  for (let i = 0; i < 8; i++) {
+    const bet = randomBet();
+    const won = Math.random() > 0.5;
+    const side = Math.random() > 0.5 ? 'heads' : 'tails';
+    const result = Math.random() > 0.5 ? 'heads' : 'tails';
+    const delta = won ? bet * 0.92 : -bet;
+    seeds.push({ addr: randomAddr(), bet, side, result, won, delta });
+  }
+  // Render seeded ticker
+  const track = document.getElementById('tickerTrack');
+  const items = seeds.map(f => {
+    const badge = f.result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = f.won ? 'ticker-win' : 'ticker-loss';
+    const valText = f.won ? '+' + f.delta.toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    return `<span class="ticker-item">${badge}<span class="ticker-addr">${f.addr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }).join('');
+  track.innerHTML = items + items;
+  track.style.animationDuration = '25s';
+}
 
 /* ── Boot ── */
 async function boot() {
@@ -1073,6 +1313,7 @@ async function boot() {
   } catch(e) {}
 }
 boot();
+seedTicker();
 setInterval(boot, 20000);
 
 /* ── Wallet ── */
@@ -1096,6 +1337,7 @@ async function connectWallet() {
     document.getElementById('flipBtn').disabled = false;
     document.getElementById('flipBtn').textContent = 'FLIP';
     document.getElementById('balHint').textContent = network + ' balance';
+    updateMyHistVisibility();
     toast('Wallet connected', 'ok');
   } catch(e) { toast('Connection cancelled', 'err'); }
 }
@@ -1110,6 +1352,7 @@ function disco() {
   document.getElementById('flipBtn').textContent = 'Connect Wallet to Play';
   document.getElementById('balNum').innerHTML = '—<span class="bal-unit">SOL</span>';
   document.getElementById('balHint').textContent = 'Connect your wallet to start playing';
+  updateMyHistVisibility();
 }
 
 async function refreshBal() {
@@ -1202,32 +1445,73 @@ async function doFlip() {
     done(); return;
   }
 
-  // ─ Step 2: Confirm on-chain ─
-  step(2,'active');
-  try {
-    const { blockhash, lastValidBlockHeight } = await c.getLatestBlockhash('confirmed');
-    await c.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed');
-    step(2,'done','Confirmed on Solana ✓');
-  } catch(e) { step(2,'done','Confirmed ✓'); }
+  // ─ Step 2: Confirm on-chain (with retries + RPC failover) ─
+  step(2,'active','Confirming on Solana, please wait…');
+  let confirmed = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const cc = C();
+      const { blockhash, lastValidBlockHeight } = await cc.getLatestBlockhash('confirmed');
+      await Promise.race([
+        cc.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed'),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000)),
+      ]);
+      confirmed = true;
+      step(2,'done','Confirmed on Solana ✓');
+      break;
+    } catch(e) {
+      console.log(`Confirm attempt ${attempt + 1} failed:`, e.message);
+      if (attempt < 2) {
+        step(2,'active',`Confirming on Solana (retry ${attempt + 2}/3)…`);
+        nextRPC(); // try a different RPC
+        await sleep(3000);
+      } else {
+        // Even if confirmTransaction fails, the tx may still be valid
+        // The server will verify it with its own polling
+        step(2,'done','Confirmation slow, proceeding…');
+        console.log('All confirm attempts exhausted, proceeding to server call');
+      }
+    }
+  }
 
-  // ─ Step 3: Spin coin & call server ─
-  step(3,'active');
+  // ─ Step 3: Spin coin & call server (with retry on "not found") ─
+  step(3,'active','Resolving flip on server…');
   document.getElementById('coinInner').className = 'coin-inner do-flip';
 
   let res;
-  try {
-    const r = await fetch(`${SERVER}/api/flip`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ txSignature:sig, playerPubkey:wallet, betAmount:bet, side })
-    });
-    res = await r.json();
-    if (!r.ok || !res.success) throw new Error(res.error || 'Server error');
-    step(3,'done',`Result: ${res.result.toUpperCase()} ✓`);
-  } catch(e) {
-    step(3,'fail', e.message);
-    toast(e.message, 'err');
-    document.getElementById('coinInner').className = 'coin-inner';
-    done(); return;
+  let serverAttempts = 0;
+  const maxServerAttempts = 2;
+  while (serverAttempts < maxServerAttempts) {
+    try {
+      serverAttempts++;
+      if (serverAttempts > 1) {
+        step(3,'active',`Retrying server verification (attempt ${serverAttempts})…`);
+        await sleep(5000); // wait for tx to propagate on server's node
+      }
+      const r = await fetch(`${SERVER}/api/flip`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ txSignature:sig, playerPubkey:wallet, betAmount:bet, side })
+      });
+      res = await r.json();
+      if (!r.ok || !res.success) {
+        const errMsg = res.error || 'Server error';
+        // If "not found on-chain" and we have retries left, retry
+        if (errMsg.includes('not found') && serverAttempts < maxServerAttempts) {
+          console.log('Server says tx not found, will retry…');
+          continue;
+        }
+        throw new Error(errMsg);
+      }
+      step(3,'done',`Result: ${res.result.toUpperCase()} ✓`);
+      break;
+    } catch(e) {
+      if (serverAttempts >= maxServerAttempts) {
+        step(3,'fail', e.message);
+        toast(e.message, 'err');
+        document.getElementById('coinInner').className = 'coin-inner';
+        done(); return;
+      }
+    }
   }
 
   // ─ Step 4: Payout ─
@@ -1290,44 +1574,123 @@ function done() {
 
 /* ── Stats ── */
 function updateStats() {
-  document.getElementById('st-flips').textContent = totalFlips;
-  const wr = document.getElementById('st-wr');
-  wr.textContent = totalFlips > 0 ? Math.round(totalWins/totalFlips*100)+'%' : '—';
-  wr.style.color = totalFlips > 0 ? (totalWins/totalFlips > 0.5 ? 'var(--e4)' : 'var(--g3)') : 'var(--t2)';
-  const pl = document.getElementById('st-pnl');
-  pl.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(3);
-  pl.style.color = pnl > 0 ? 'var(--e4)' : pnl < 0 ? 'var(--r2)' : 'var(--t2)';
+  // Update all stat elements (both mobile and desktop copies)
+  document.querySelectorAll('.qs-val-flips').forEach(el => el.textContent = totalFlips);
+  document.querySelectorAll('.qs-val-wr').forEach(el => {
+    el.textContent = totalFlips > 0 ? Math.round(totalWins/totalFlips*100)+'%' : '—';
+    el.style.color = totalFlips > 0 ? (totalWins/totalFlips > 0.5 ? 'var(--e4)' : 'var(--g3)') : 'var(--t2)';
+  });
+  document.querySelectorAll('.qs-val-pnl').forEach(el => {
+    el.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(3);
+    el.style.color = pnl > 0 ? 'var(--e4)' : pnl < 0 ? 'var(--r2)' : 'var(--t2)';
+  });
 }
 
 /* ── History ── */
 function addHist(f) {
   hist.unshift({ n: ++hist.length, ...f }); // keep index
   renderHist();
+  updateTicker(f);
 }
 function renderHist() {
+  // Legacy left-column history (mobile)
   const b = document.getElementById('histBody');
   if (!hist.length) {
     b.innerHTML = '<tr><td colspan="6"><div class="hist-empty">— No flips yet —</div></td></tr>';
-    return;
+  } else {
+    b.innerHTML = hist.slice(0,15).map((f,i) => `
+      <tr>
+        <td class="hist-addr">${totalFlips - i}</td>
+        <td class="hist-addr">${wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '—'}</td>
+        <td>${parseFloat(f.bet).toFixed(3)}</td>
+        <td>${f.side} → <b>${f.result}</b></td>
+        <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
+        <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)}</td>
+      </tr>`).join('');
   }
-  b.innerHTML = hist.slice(0,15).map((f,i) => `
-    <tr>
-      <td class="hist-addr">${totalFlips - i}</td>
-      <td class="hist-addr">${wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '—'}</td>
-      <td>${parseFloat(f.bet).toFixed(3)}</td>
-      <td>${f.side} → <b>${f.result}</b></td>
-      <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
-      <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)}</td>
-    </tr>`).join('');
+
+  // Full-width my-history table (desktop)
+  const mb = document.getElementById('myHistBody');
+  if (!mb) return;
+  if (!hist.length) {
+    mb.innerHTML = '<tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr>';
+  } else {
+    mb.innerHTML = hist.slice(0,20).map(f => `
+      <tr>
+        <td>${parseFloat(f.bet).toFixed(3)} SOL</td>
+        <td>${f.side} → <b>${f.result}</b></td>
+        <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
+        <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)} SOL</td>
+      </tr>`).join('');
+  }
 }
+
+/* ── My History visibility ── */
+function updateMyHistVisibility() {
+  const section = document.getElementById('myHistorySection');
+  const connectMsg = document.getElementById('myHistConnect');
+  const content = document.getElementById('myHistContent');
+  if (!section) return;
+  if (wallet) {
+    connectMsg.style.display = 'none';
+    content.style.display = 'block';
+  } else {
+    connectMsg.style.display = 'block';
+    content.style.display = 'none';
+  }
+}
+
+/* ── Live Ticker ── */
+let tickerFlips = [];
+function updateTicker(flip) {
+  tickerFlips.unshift(flip);
+  if (tickerFlips.length > 20) tickerFlips.pop();
+  renderTicker();
+}
+function renderTicker() {
+  const track = document.getElementById('tickerTrack');
+  if (!tickerFlips.length) return;
+  const myAddr = wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '???';
+  // Real player flips use real wallet, plus mix in some fake background flips
+  const realItems = tickerFlips.map(f => {
+    const badge = f.result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = f.won ? 'ticker-win' : 'ticker-loss';
+    const valText = f.won ? '+' + f.delta.toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    return `<span class="ticker-item">${badge}<span class="ticker-addr">${myAddr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }).join('');
+  // Add some fake background flips
+  let fakeItems = '';
+  for (let i = 0; i < 6; i++) {
+    const bet = randomBet();
+    const won = Math.random() > 0.5;
+    const result = Math.random() > 0.5 ? 'heads' : 'tails';
+    const delta = won ? bet * 0.92 : -bet;
+    const badge = result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = won ? 'ticker-win' : 'ticker-loss';
+    const valText = won ? '+' + delta.toFixed(3) + ' SOL' : delta.toFixed(3) + ' SOL';
+    fakeItems += `<span class="ticker-item">${badge}<span class="ticker-addr">${randomAddr()}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }
+  const combined = realItems + fakeItems;
+  track.innerHTML = combined + combined; // duplicate for seamless loop
+  const dur = Math.max(20, (tickerFlips.length + 6) * 3);
+  track.style.animationDuration = dur + 's';
+}
+
 function clearAll() {
   hist=[]; totalFlips=0; totalWins=0; pnl=0;
+  tickerFlips=[];
   renderHist(); updateStats();
   clearSteps();
   document.getElementById('reMain').className='result-main';
   document.getElementById('reSub').className='result-sub';
   document.getElementById('txLinks').className='tx-links';
   document.getElementById('coinInner').className='coin-inner';
+  // Reset ticker
+  document.getElementById('tickerTrack').innerHTML = '<span class="ticker-item"><span class="ticker-addr" style="opacity:0.4">Waiting for flips…</span></span>';
 }
 
 /* ── Particles ── */

@@ -294,6 +294,77 @@ select.fi option{background:#10122a;}
 .toast.sh{transform:translateY(0);opacity:1;}
 .toast.ok{border-color:rgba(34,197,94,0.28);color:var(--e4);}
 .toast.er{border-color:rgba(239,68,68,0.25);color:var(--r3);}
+
+/* ─ Alert Banner ─ */
+.alert-banner{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--r3);display:none;}
+.alert-banner.sh{display:flex;}
+
+/* ─ House Stats Bar ─ */
+.hbar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.hbar .hb{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:10px 14px;}
+.hbar .hb .hl{font-family:'JetBrains Mono',monospace;font-size:0.52rem;color:var(--t3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.hbar .hb .hv{font-family:'Unbounded',sans-serif;font-size:1rem;font-weight:700;}
+
+/* ─ Filter Buttons ─ */
+.flt{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.flt .fb{padding:5px 12px;border-radius:7px;border:1px solid var(--line);background:rgba(255,255,255,0.02);color:var(--t2);font-family:'JetBrains Mono',monospace;font-size:0.62rem;cursor:pointer;transition:all 0.15s;}
+.flt .fb:hover{border-color:var(--g2);color:var(--g3);}
+.flt .fb.act{background:rgba(201,160,48,0.09);border-color:var(--g2);color:var(--g3);}
+
+/* ─ Expandable Row ─ */
+.exp-row{cursor:pointer;} .exp-row:hover td{background:rgba(201,160,48,0.03)!important;}
+.exp-detail{display:none;} .exp-detail.sh{display:table-row;}
+.exp-detail td{padding:0!important;border-bottom:1px solid var(--line)!important;}
+.exp-inner{padding:10px 16px;background:var(--ink3);border-radius:0 0 8px 8px;margin:0 6px 6px;}
+.exp-inner table{font-size:0.65rem;}
+.exp-inner th{font-size:0.5rem;padding:4px 6px;}
+.exp-inner td{padding:5px 6px;font-size:0.63rem;}
+
+/* ─ 24h Chart ─ */
+.chart-wrap{display:flex;align-items:flex-end;gap:3px;height:100px;padding:8px 0;}
+.chart-bar{flex:1;min-width:0;background:linear-gradient(to top,var(--g1),var(--g3));border-radius:3px 3px 0 0;transition:height 0.5s;position:relative;min-height:2px;}
+.chart-bar:hover{filter:brightness(1.3);}
+.chart-bar::after{content:attr(data-label);position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:0.4rem;color:var(--t3);white-space:nowrap;}
+.chart-bar::before{content:attr(data-count);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:0.42rem;color:var(--t2);white-space:nowrap;}
+
+/* ─ Live Indicator ─ */
+.live-ind{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--e4);}
+.live-ind .ld{width:6px;height:6px;border-radius:50%;background:var(--e3);animation:dp 1.5s infinite;}
+
+/* ─ Copy Tooltip ─ */
+.cp{cursor:pointer;position:relative;} .cp:hover{color:var(--g3)!important;}
+.cp::after{content:'Copied!';position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:var(--g2);color:#060400;padding:2px 7px;border-radius:4px;font-size:0.5rem;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.cp.did::after{opacity:1;}
+
+/* ─ Summary Bar ─ */
+.sumbar{display:flex;gap:14px;align-items:center;padding:8px 12px;background:var(--ink3);border:1px solid var(--line);border-radius:8px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--t2);flex-wrap:wrap;}
+.sumbar strong{color:var(--g3);}
+
+/* ─ Wins/Losses Section ─ */
+.wl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.wl-card{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.wl-card h4{font-family:'Unbounded',sans-serif;font-size:0.55rem;letter-spacing:0.08em;color:var(--t3);margin-bottom:8px;text-transform:uppercase;}
+.wl-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.025);font-family:'JetBrains Mono',monospace;font-size:0.62rem;}
+.wl-item:last-child{border:none;}
+
+/* ─ Today vs Yesterday ─ */
+.tvy{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.tvy-card{background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center;}
+.tvy-card .tvl{font-family:'JetBrains Mono',monospace;font-size:0.5rem;color:var(--t3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.tvy-card .tvv{font-family:'Unbounded',sans-serif;font-size:0.9rem;font-weight:700;color:var(--g3);}
+.tvy-card .tvd{font-family:'JetBrains Mono',monospace;font-size:0.55rem;margin-top:3px;}
+
+/* ─ Password Toggle ─ */
+.pw-wrap{position:relative;display:inline-block;}
+.pw-wrap input{padding-right:32px;}
+.pw-tog{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--t3);cursor:pointer;font-size:0.8rem;padding:0;}
+
+/* ─ Online Dropdown ─ */
+.on-dd{position:relative;display:inline-block;}
+.on-list{display:none;position:absolute;top:100%;right:0;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:8px;min-width:200px;max-height:200px;overflow-y:auto;z-index:50;margin-top:4px;}
+.on-list.sh{display:block;}
+.on-list .oli{font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--t2);padding:4px 6px;border-radius:4px;}
+.on-list .oli:hover{background:rgba(255,255,255,0.03);}
 </style>
 </head>
 <body>
@@ -346,6 +417,7 @@ select.fi option{background:#10122a;}
 
       <!-- ── DASHBOARD ── -->
       <div class="sec on" id="s-dash">
+        <div class="alert-banner" id="lowBalAlert">⚠️ Treasury balance is below <span id="lowBalThr">0.1</span> SOL — consider topping up!</div>
         <div class="sg">
           <div class="sc"><div class="l">Treasury</div><div class="v gold" id="d-b">—</div><div class="s" id="d-n">—</div></div>
           <div class="sc"><div class="l">House Profit</div><div class="v grn" id="d-p">0.0000</div><div class="s" id="d-w">wagered 0</div></div>
@@ -372,12 +444,46 @@ select.fi option{background:#10122a;}
             </div>
           </div>
         </div>
+        <!-- 24h Chart -->
+        <div class="card">
+          <div class="ch"><h3>Flip Volume — Last 24 Hours</h3></div>
+          <div class="chart-wrap" id="d-chart"></div>
+        </div>
+        <!-- Recent Wins / Losses -->
+        <div class="card">
+          <div class="ch"><h3>Recent Wins & Losses</h3></div>
+          <div class="wl-grid">
+            <div class="wl-card"><h4>🎉 Last 5 Wins</h4><div id="d-wins"><span style="color:var(--t3);font-size:0.62rem;">None yet</span></div></div>
+            <div class="wl-card"><h4>💀 Last 5 Losses</h4><div id="d-losses"><span style="color:var(--t3);font-size:0.62rem;">None yet</span></div></div>
+          </div>
+        </div>
+        <!-- Today vs Yesterday -->
+        <div class="card">
+          <div class="ch"><h3>Today vs Yesterday</h3></div>
+          <div class="tvy">
+            <div class="tvy-card"><div class="tvl">Flips</div><div class="tvv" id="tv-f">0</div><div class="tvd" id="tv-fd">—</div></div>
+            <div class="tvy-card"><div class="tvl">Wagered</div><div class="tvv" id="tv-w">0</div><div class="tvd" id="tv-wd">—</div></div>
+            <div class="tvy-card"><div class="tvl">Profit</div><div class="tvv" id="tv-p">0</div><div class="tvd" id="tv-pd">—</div></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── LIVE FLIPS ── -->
       <div class="sec" id="s-live">
         <div class="card">
-          <div class="ch"><h3>All Flips</h3><input class="srch" type="text" placeholder="Search wallet…" id="fsq" oninput="fFlips()"></div>
+          <div class="ch">
+            <h3>All Flips</h3>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="live-ind" id="liveInd"><span class="ld"></span>Auto-refresh</span>
+              <input class="srch" type="text" placeholder="Search wallet…" id="fsq" oninput="fFlips()">
+            </div>
+          </div>
+          <div class="sumbar" id="flipSumBar">Flips: <strong id="fsb-c">0</strong> &nbsp;·&nbsp; Wagered: <strong id="fsb-w">0</strong> &nbsp;·&nbsp; Payout: <strong id="fsb-p">0</strong></div>
+          <div class="flt" id="flipFilters">
+            <button class="fb act" onclick="setFlipFilter('all')">All</button>
+            <button class="fb" onclick="setFlipFilter('wins')">Wins Only</button>
+            <button class="fb" onclick="setFlipFilter('losses')">Losses Only</button>
+          </div>
           <div class="tw">
             <table>
               <thead><tr><th>#</th><th>Player</th><th>Bet</th><th>Picked</th><th>Result</th><th>Outcome</th><th>Payout</th><th>Mode</th><th>Time</th></tr></thead>
@@ -391,6 +497,13 @@ select.fi option{background:#10122a;}
       <!-- ── PLAYERS ── -->
       <div class="sec" id="s-players">
         <div class="card">
+          <div class="sumbar" id="playerSumBar">Players: <strong id="psb-t">0</strong> &nbsp;·&nbsp; Total Flips: <strong id="psb-f">0</strong> &nbsp;·&nbsp; Wagered: <strong id="psb-w">0</strong> &nbsp;·&nbsp; House Profit: <strong id="psb-p">0</strong></div>
+          <div class="flt" id="playerFilters">
+            <button class="fb act" onclick="setPlayerFilter('all')">All</button>
+            <button class="fb" onclick="setPlayerFilter('online')">Online</button>
+            <button class="fb" onclick="setPlayerFilter('banned')">Banned</button>
+            <button class="fb" onclick="setPlayerFilter('highval')">High Value (>1 SOL)</button>
+          </div>
           <div class="ch"><h3>All Players</h3><input class="srch" type="text" placeholder="Search wallet…" id="psq" oninput="fPlayers()"></div>
           <div class="tw">
             <table>
@@ -422,6 +535,12 @@ select.fi option{background:#10122a;}
 
       <!-- ── FLIP CONTROL ── -->
       <div class="sec" id="s-ctrl">
+        <!-- House Stats Bar -->
+        <div class="hbar">
+          <div class="hb"><div class="hl">Wagered Today</div><div class="hv gold" id="hs-w">0</div></div>
+          <div class="hb"><div class="hl">Paid Out Today</div><div class="hv red" id="hs-p">0</div></div>
+          <div class="hb"><div class="hl">Net Profit Today</div><div class="hv grn" id="hs-n">0</div></div>
+        </div>
         <div class="tc">
           <div class="card">
             <div class="ch"><h3>Flip Mode</h3><span class="bx bgo" id="cm">random</span></div>
@@ -449,10 +568,30 @@ select.fi option{background:#10122a;}
               <div><div class="crl">Game Enabled</div><div class="crs">Disable to halt all new bets</div></div>
               <label class="tog"><input type="checkbox" id="ge" onchange="ss('gameEnabled',this.checked)"><span class="tsl"></span></label>
             </div>
+            <div class="cr">
+              <div><div class="crl">Pause All Bets</div><div class="crs">Temporarily stop bets without disabling game</div></div>
+              <div style="display:flex;gap:5px;">
+                <button class="btn btn-am btn-sm" id="pauseBtn" onclick="pauseBets()">⏸ Pause</button>
+                <button class="btn btn-gn btn-sm" id="resumeBtn" onclick="resumeBets()" style="display:none">▶ Resume</button>
+              </div>
+            </div>
             <div class="cr" style="border:none">
               <div><div class="crl">Active Players</div></div>
-              <span class="bx bg" id="ap">0 online</span>
+              <div class="on-dd">
+                <span class="bx bg" id="ap" style="cursor:pointer" onclick="toggleOnList()">0 online</span>
+                <div class="on-list" id="onList"></div>
+              </div>
             </div>
+          </div>
+        </div>
+        <!-- Flip Log -->
+        <div class="card">
+          <div class="ch"><h3>Recent Flip Log</h3><span class="live-ind"><span class="ld"></span>Auto 5s</span></div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Player</th><th>Bet</th><th>Picked</th><th>Result</th><th>Outcome</th><th>Payout</th><th>Time</th></tr></thead>
+              <tbody id="ctrlLogTb"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -465,13 +604,14 @@ select.fi option{background:#10122a;}
             <div class="cr"><div><div class="crl">Min Bet (SOL)</div></div><input class="fi" type="number" id="s-mn" style="width:88px" step="0.001" onchange="ss('minBet',parseFloat(this.value))"></div>
             <div class="cr"><div><div class="crl">Max Bet (SOL)</div></div><input class="fi" type="number" id="s-mx" style="width:88px" step="0.01" onchange="ss('maxBet',parseFloat(this.value))"></div>
             <div class="cr"><div><div class="crl">House Edge (%)</div><div class="crs">Payout = 2×(1−edge)</div></div><input class="fi" type="number" id="s-he" style="width:88px" step="0.1" min="0" max="50" onchange="ss('houseEdge',parseFloat(this.value)/100)"></div>
-            <div class="cr" style="border:none"><div><div class="crl">Network</div></div>
+            <div class="cr"><div><div class="crl">Network</div></div>
               <select class="fi" id="s-nt" style="width:140px" onchange="ss('network',this.value)">
                 <option value="devnet">Devnet</option>
                 <option value="testnet">Testnet</option>
                 <option value="mainnet-beta">Mainnet</option>
               </select>
             </div>
+            <div class="cr" style="border:none"><div><div class="crl">Low Balance Alert (SOL)</div><div class="crs">Dashboard warning threshold</div></div><input class="fi" type="number" id="s-lb" style="width:88px" step="0.01" onchange="ss('lowBalanceThreshold',parseFloat(this.value))"></div>
           </div>
           <div class="card">
             <div class="ch"><h3>Admin Settings</h3></div>
@@ -479,6 +619,48 @@ select.fi option{background:#10122a;}
               <div style="display:flex;gap:6px"><input class="fi" type="password" id="s-pw" placeholder="new password" style="width:120px"><button class="btn btn-am btn-sm" onclick="chPw()">Set</button></div>
             </div>
             <div class="cr" style="border:none"><div><div class="crl">Session Timeout (min)</div></div><input class="fi" type="number" id="s-to" style="width:80px" min="5" onchange="ss('sessionTimeoutMin',parseInt(this.value))"></div>
+          </div>
+        </div>
+        <!-- RPC & API Configuration -->
+        <div class="card">
+          <div class="ch"><h3>RPC & API Configuration</h3></div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+            <div class="fg"><label>Mainnet RPC URL</label><input class="fi" type="text" id="rpc-main" placeholder="https://mainnet.helius-rpc.com/?api-key=YOUR_KEY"></div>
+            <button class="btn btn-gh btn-sm" onclick="testRpc('rpc-main','rpc-main-st')">Test</button>
+          </div>
+          <div id="rpc-main-st" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;margin:-6px 0 10px;"></div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px">
+            <div class="fg"><label>Testnet RPC URL</label><input class="fi" type="text" id="rpc-test" placeholder="https://testnet.helius-rpc.com/?api-key=YOUR_KEY"></div>
+            <button class="btn btn-gh btn-sm" onclick="testRpc('rpc-test','rpc-test-st')">Test</button>
+          </div>
+          <div id="rpc-test-st" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;margin:-6px 0 10px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="fg"><label>API Key</label>
+              <div class="pw-wrap" style="width:100%"><input class="fi" type="password" id="rpc-key" placeholder="Paste API key"><button class="pw-tog" onclick="togPw('rpc-key',this)">👁</button></div>
+            </div>
+            <div class="fg"><label>Provider Name</label><input class="fi" type="text" id="rpc-prov" placeholder="e.g. Helius, QuickNode"></div>
+          </div>
+          <div id="rpc-key-mask" style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--t3);margin-bottom:10px;"></div>
+          <button class="btn btn-go" onclick="saveRpc()">Save RPC Settings</button>
+        </div>
+        <!-- Treasury Management -->
+        <div class="card">
+          <div class="ch"><h3>Treasury Management</h3></div>
+          <div class="cr">
+            <div style="flex:1;min-width:0"><div class="crl">Treasury Public Key</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--g3);word-break:break-all;margin-top:4px" id="tm-pub">—</div>
+            </div>
+            <button class="btn btn-gh btn-sm" onclick="copyTmPub()">📋 Copy</button>
+          </div>
+          <div class="cr">
+            <div><div class="crl">Live Balance</div><div style="font-family:'Unbounded',sans-serif;font-size:1rem;font-weight:700;color:var(--e4);margin-top:4px" id="tm-bal">—</div></div>
+            <button class="btn btn-gh btn-sm" onclick="refreshTm()">↻ Refresh</button>
+          </div>
+          <div class="cr" style="border:none">
+            <div style="flex:1"><div class="crl">Update Treasury Key</div><div class="crs">Paste private key array [1,2,3...64]</div>
+              <input class="fi" type="text" id="tm-newkey" placeholder="[1,2,3,...64]" style="margin-top:6px">
+            </div>
+            <button class="btn btn-am btn-sm" style="align-self:flex-end" onclick="updateTmKey()">Save Key</button>
           </div>
         </div>
       </div>
@@ -497,6 +679,9 @@ select.fi option{background:#10122a;}
 const API = '';
 let tok = sessionStorage.getItem('st')||'';
 let aP=[],aF=[],fp=1; const FPS=50;
+let flipFilter='all', playerFilter='all';
+let liveTimer=null, ctrlLogTimer=null, chartTimer=null;
+let cachedOnlineWallets=[];
 const TT={dash:'DASHBOARD',live:'LIVE FLIPS',players:'PLAYERS',wallets:'WALLETS',ctrl:'FLIP CONTROL',cfg:'SETTINGS'};
 
 /* ── Login ── */
@@ -508,7 +693,7 @@ async function login(){
     tok=d.token; sessionStorage.setItem('st',tok);
     document.getElementById('ls').style.display='none';
     document.getElementById('shell').style.display='flex';
-    loadAll(); setInterval(loadStats,9000);
+    loadAll(); setInterval(loadStats,9000); chartTimer=setInterval(loadStats,60000);
   }catch(e){document.getElementById('le').textContent='❌ '+e.message;}
 }
 if(tok){
@@ -527,16 +712,17 @@ function nav(id){
   document.getElementById('s-'+id).classList.add('on');
   document.getElementById('n-'+id).classList.add('on');
   document.getElementById('ttl').textContent=TT[id];
-  if(id==='live') lFlips();
+  clearInterval(liveTimer); clearInterval(ctrlLogTimer);
+  if(id==='live'){lFlips();liveTimer=setInterval(()=>lFlips(fp),3000);}
   if(id==='players') lPlayers();
   if(id==='wallets') lWallets();
   if(id==='cfg') lCfg();
-  if(id==='ctrl') lCtrl();
+  if(id==='ctrl'){lCtrl();ctrlLogTimer=setInterval(lCtrlLog,5000);}
 }
 function loadAll(){loadStats();}
 function refreshAll(){loadStats();const c=document.querySelector('.sbi.on');if(c)c.click();}
 
-/* ── Stats ── */
+/* ── Stats (enhanced) ── */
 async function loadStats(){
   try{
     const r=await fetch(`${API}/admin/stats`,{headers:ah()});
@@ -564,6 +750,31 @@ async function loadStats(){
     document.getElementById('fnp').textContent=d.financials.houseProfit.toFixed(4)+' SOL';
     document.getElementById('fhe').textContent=d.financials.houseEdgePct+'%';
     rRecent(d.recentFlips||[]);
+    cachedOnlineWallets=d.players.onlineWallets||[];
+    // Low balance alert
+    const la=document.getElementById('lowBalAlert');
+    if(d.treasury.lowBalance){la.classList.add('sh');document.getElementById('lowBalThr').textContent=d.treasury.lowBalanceThreshold;}
+    else la.classList.remove('sh');
+    // 24h chart
+    rChart(d.hourlyVolume||[]);
+    // Wins/Losses
+    rWinLoss(d.last5Wins||[],d.last5Losses||[]);
+    // Today vs yesterday
+    rDaily(d.dailyStats);
+    // House stats for ctrl
+    if(d.dailyStats){
+      document.getElementById('hs-w').textContent=d.dailyStats.today.wagered.toFixed(4)+' SOL';
+      document.getElementById('hs-p').textContent=d.dailyStats.today.paidOut.toFixed(4)+' SOL';
+      document.getElementById('hs-n').textContent=d.dailyStats.today.profit.toFixed(4)+' SOL';
+    }
+    // Pause state
+    if(d.settings.betsPaused){
+      document.getElementById('pauseBtn').style.display='none';
+      document.getElementById('resumeBtn').style.display='';
+    } else {
+      document.getElementById('pauseBtn').style.display='';
+      document.getElementById('resumeBtn').style.display='none';
+    }
   }catch(e){}
 }
 function rRecent(fl){
@@ -571,13 +782,55 @@ function rRecent(fl){
   if(!fl.length){el.innerHTML='<div style="text-align:center;padding:18px;color:var(--t3);font-family:JetBrains Mono,monospace;font-size:0.67rem;">No flips yet</div>';return;}
   el.innerHTML=fl.slice(0,8).map(f=>`<div class="mfr"><span class="ta">${f.playerPubkey.slice(0,8)}…</span><span>${f.betSol.toFixed(3)} SOL</span><span class="tn">${f.side}→${f.result}</span><span class="${f.playerWon?'tw2':'tl'}">${f.playerWon?'WIN':'LOSS'}</span><span class="tn">${new Date(f.timestamp).toLocaleTimeString()}</span></div>`).join('');
 }
+function rChart(hrs){
+  const el=document.getElementById('d-chart'); if(!el)return;
+  const max=Math.max(...hrs.map(h=>h.count),1);
+  el.innerHTML=hrs.map(h=>`<div class="chart-bar" style="height:${Math.max(2,h.count/max*100)}%" data-label="${h.hour}h" data-count="${h.count}"></div>`).join('');
+}
+function rWinLoss(wins,losses){
+  const we=document.getElementById('d-wins');
+  const le=document.getElementById('d-losses');
+  we.innerHTML=wins.length?wins.map(f=>`<div class="wl-item"><span class="ta">${f.playerPubkey.slice(0,6)}…${f.playerPubkey.slice(-4)}</span><span class="tg">+${f.payoutSol.toFixed(4)}</span></div>`).join(''):'<span style="color:var(--t3);font-size:0.62rem;">None yet</span>';
+  le.innerHTML=losses.length?losses.map(f=>`<div class="wl-item"><span class="ta">${f.playerPubkey.slice(0,6)}…${f.playerPubkey.slice(-4)}</span><span class="tl">-${f.betSol.toFixed(4)}</span></div>`).join(''):'<span style="color:var(--t3);font-size:0.62rem;">None yet</span>';
+}
+function rDaily(ds){
+  if(!ds)return;
+  const d=document.getElementById.bind(document);
+  d('tv-f').textContent=ds.today.total;
+  d('tv-w').textContent=ds.today.wagered.toFixed(4);
+  d('tv-p').textContent=ds.today.profit.toFixed(4);
+  const diff=(a,b)=>{if(b===0)return'—';const p=((a-b)/b*100).toFixed(0);return p>=0?`<span style="color:var(--e4)">↑${p}%</span>`:`<span style="color:var(--r2)">↓${Math.abs(p)}%</span>`;};
+  d('tv-fd').innerHTML='vs '+ds.yesterday.total+' &nbsp;'+diff(ds.today.total,ds.yesterday.total);
+  d('tv-wd').innerHTML='vs '+ds.yesterday.wagered.toFixed(4)+' &nbsp;'+diff(ds.today.wagered,ds.yesterday.wagered);
+  d('tv-pd').innerHTML='vs '+ds.yesterday.profit.toFixed(4)+' &nbsp;'+diff(ds.today.profit,ds.yesterday.profit);
+}
 
-/* ── Players ── */
-async function lPlayers(){const r=await fetch(`${API}/admin/players`,{headers:ah()});aP=await r.json();rPlayers(aP);}
+/* ── Players (enhanced) ── */
+async function lPlayers(){const r=await fetch(`${API}/admin/players`,{headers:ah()});aP=await r.json();rPlayerSum(aP);applyPlayerFilter();}
+function rPlayerSum(l){
+  document.getElementById('psb-t').textContent=l.length;
+  document.getElementById('psb-f').textContent=l.reduce((s,p)=>s+p.totalFlips,0);
+  document.getElementById('psb-w').textContent=l.reduce((s,p)=>s+p.totalWagered,0).toFixed(4)+' SOL';
+  document.getElementById('psb-p').textContent=l.reduce((s,p)=>s+p.netLoss,0).toFixed(4)+' SOL';
+}
+function setPlayerFilter(f){
+  playerFilter=f;
+  document.querySelectorAll('#playerFilters .fb').forEach(b=>b.classList.remove('act'));
+  event.target.classList.add('act');
+  applyPlayerFilter();
+}
+function applyPlayerFilter(){
+  let l=aP;const q=document.getElementById('psq').value.toLowerCase();
+  if(q)l=l.filter(p=>p.pubkey.toLowerCase().includes(q));
+  if(playerFilter==='online')l=l.filter(p=>p.online);
+  if(playerFilter==='banned')l=l.filter(p=>p.banned);
+  if(playerFilter==='highval')l=l.filter(p=>p.totalWagered>1);
+  rPlayers(l);
+}
 function rPlayers(l){
   const b=document.getElementById('ptb');
-  if(!l.length){b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:22px;font-family:JetBrains Mono,monospace;font-size:0.68rem;">No players yet</td></tr>';return;}
-  b.innerHTML=l.map(p=>`<tr>
+  if(!l.length){b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:22px;font-family:JetBrains Mono,monospace;font-size:0.68rem;">No players</td></tr>';return;}
+  b.innerHTML=l.map(p=>`<tr class="exp-row" onclick="togPlayerExp(this,'${p.pubkey}')">
     <td class="ta" title="${p.pubkey}">${p.pubkey.slice(0,6)}…${p.pubkey.slice(-4)}${p.banned?' <span class="ban">BANNED</span>':''}</td>
     <td>${p.online?'<span class="son">online</span>':'<span class="sof">offline</span>'}</td>
     <td>${p.totalFlips}</td>
@@ -586,35 +839,77 @@ function rPlayers(l){
     <td class="tm">${p.totalWagered.toFixed(4)}</td>
     <td class="${p.netLoss>=0?'tg':'tl'}">${p.netLoss>=0?'+':''}${p.netLoss.toFixed(4)}</td>
     <td class="tn">${new Date(p.firstSeen).toLocaleDateString()}</td>
-    <td>${p.banned?`<button class="btn btn-gh btn-sm" onclick="uBan('${p.pubkey}')">Unban</button>`:`<button class="btn btn-rd btn-sm" onclick="dBan('${p.pubkey}')">Ban</button>`}</td>
-  </tr>`).join('');
+    <td>${p.banned?`<button class="btn btn-gh btn-sm" onclick="event.stopPropagation();uBan('${p.pubkey}')">Unban</button>`:`<button class="btn btn-rd btn-sm" onclick="event.stopPropagation();dBan('${p.pubkey}')">Ban</button>`}</td>
+  </tr><tr class="exp-detail" id="exp-${p.pubkey.slice(0,8)}"><td colspan="9"><div class="exp-inner" id="expi-${p.pubkey.slice(0,8)}">Loading…</div></td></tr>`).join('');
 }
-function fPlayers(){const q=document.getElementById('psq').value.toLowerCase();rPlayers(aP.filter(p=>p.pubkey.toLowerCase().includes(q)));}
+async function togPlayerExp(row,pk){
+  const det=document.getElementById('exp-'+pk.slice(0,8));
+  if(det.classList.contains('sh')){det.classList.remove('sh');return;}
+  document.querySelectorAll('.exp-detail.sh').forEach(d=>d.classList.remove('sh'));
+  det.classList.add('sh');
+  const inner=document.getElementById('expi-'+pk.slice(0,8));
+  inner.innerHTML='Loading…';
+  try{
+    const r=await fetch(`${API}/admin/player/${pk}/flips`,{headers:ah()});
+    const flips=await r.json();
+    if(!flips.length){inner.innerHTML='<span style="color:var(--t3);font-size:0.62rem;">No flips</span>';return;}
+    inner.innerHTML='<table><thead><tr><th>Bet</th><th>Picked</th><th>Result</th><th>Outcome</th><th>Payout</th><th>Time</th></tr></thead><tbody>'+
+      flips.slice(0,20).map(f=>`<tr><td>${f.betSol.toFixed(4)}</td><td>${f.side}</td><td><b>${f.result}</b></td><td class="${f.playerWon?'tw2':'tl'}">${f.playerWon?'WIN':'LOSS'}</td><td class="${f.playerWon?'tg':'tn'}">${f.playerWon?'+'+f.payoutSol.toFixed(4):'—'}</td><td class="tn">${new Date(f.timestamp).toLocaleTimeString()}</td></tr>`).join('')+'</tbody></table>';
+  }catch(e){inner.innerHTML='Error loading';}
+}
+function fPlayers(){applyPlayerFilter();}
 async function dBan(pk){if(!confirm('Ban '+pk+'?'))return;await fetch(`${API}/admin/ban`,{method:'POST',headers:ah(),body:JSON.stringify({pubkey:pk})});toast('Banned','ok');lPlayers();}
 async function uBan(pk){await fetch(`${API}/admin/unban`,{method:'POST',headers:ah(),body:JSON.stringify({pubkey:pk})});toast('Unbanned','ok');lPlayers();}
 
-/* ── Flips ── */
-async function lFlips(p=1){fp=p;const r=await fetch(`${API}/admin/flips?page=${p}&limit=${FPS}`,{headers:ah()});const d=await r.json();aF=d.flips;rFlips(d.flips,d.total,p);}
+/* ── Flips (enhanced) ── */
+function setFlipFilter(f){
+  flipFilter=f;
+  document.querySelectorAll('#flipFilters .fb').forEach(b=>b.classList.remove('act'));
+  event.target.classList.add('act');
+  applyFlipFilter();
+}
+async function lFlips(p=1){fp=p;const r=await fetch(`${API}/admin/flips?page=${p}&limit=${FPS}`,{headers:ah()});const d=await r.json();aF=d.flips;applyFlipFilter();rFlipPg(d.total,p);}
+function applyFlipFilter(){
+  let fl=aF;
+  const q=document.getElementById('fsq').value.toLowerCase();
+  if(q)fl=fl.filter(f=>f.playerPubkey.toLowerCase().includes(q));
+  if(flipFilter==='wins')fl=fl.filter(f=>f.playerWon);
+  if(flipFilter==='losses')fl=fl.filter(f=>!f.playerWon);
+  rFlips(fl,fl.length,fp);
+  // Summary
+  document.getElementById('fsb-c').textContent=fl.length;
+  document.getElementById('fsb-w').textContent=fl.reduce((s,f)=>s+f.betSol,0).toFixed(4)+' SOL';
+  document.getElementById('fsb-p').textContent=fl.filter(f=>f.playerWon).reduce((s,f)=>s+f.payoutSol,0).toFixed(4)+' SOL';
+}
 function rFlips(fl,tot,p){
   const b=document.getElementById('ftb');
-  if(!fl.length){b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:22px;font-family:JetBrains Mono,monospace;font-size:0.68rem;">No flips yet</td></tr>';return;}
+  if(!fl.length){b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:22px;font-family:JetBrains Mono,monospace;font-size:0.68rem;">No flips</td></tr>';return;}
+  const modeClass=(m)=>m==='random'?'bgo':m.includes('head')?'bg':m.includes('tail')?'br':'ba';
   b.innerHTML=fl.map((f,i)=>`<tr>
     <td class="tn">${(p-1)*FPS+i+1}</td>
-    <td class="ta" title="${f.playerPubkey}">${f.playerPubkey.slice(0,6)}…${f.playerPubkey.slice(-4)}</td>
+    <td class="ta cp" title="${f.playerPubkey}" onclick="cpAddr(this,'${f.playerPubkey}')">${f.playerPubkey.slice(0,6)}…${f.playerPubkey.slice(-4)}</td>
     <td>${f.betSol.toFixed(4)}</td>
     <td class="tm">${f.side}</td>
     <td><b>${f.result}</b></td>
     <td class="${f.playerWon?'tw2':'tl'}">${f.playerWon?'✓ WIN':'✗ LOSS'}</td>
     <td class="${f.playerWon?'tg':'tn'}">${f.playerWon?'+'+f.payoutSol.toFixed(4):'—'}</td>
-    <td><span class="bx ${f.flipMode==='random'?'bgo':f.flipMode.includes('head')?'bg':'ba'}">${f.flipMode}</span></td>
+    <td><span class="bx ${modeClass(f.flipMode)}">${f.flipMode}</span></td>
     <td class="tn">${new Date(f.timestamp).toLocaleTimeString()}</td>
   </tr>`).join('');
+}
+function rFlipPg(tot,p){
   const pg=document.getElementById('fpg');
   const pages=Math.ceil(tot/FPS);
   pg.innerHTML=`<span class="pgi">${tot} total</span>`;
   for(let i=1;i<=Math.min(pages,8);i++) pg.innerHTML+=`<button class="pgb ${i===p?'cur':''}" onclick="lFlips(${i})">${i}</button>`;
 }
-function fFlips(){const q=document.getElementById('fsq').value.toLowerCase();rFlips(aF.filter(f=>f.playerPubkey.toLowerCase().includes(q)),aF.length,fp);}
+function fFlips(){applyFlipFilter();}
+
+/* ── Copy address ── */
+function cpAddr(el,addr){
+  navigator.clipboard.writeText(addr);
+  el.classList.add('did');setTimeout(()=>el.classList.remove('did'),1200);
+}
 
 /* ── Wallets ── */
 async function lWallets(){const r=await fetch(`${API}/admin/wallets`,{headers:ah()});rWallets(await r.json());}
@@ -651,13 +946,27 @@ async function addW(){
 async function actW(id){await fetch(`${API}/admin/wallets/${id}/activate`,{method:'PUT',headers:ah()});toast('Active wallet switched','ok');lWallets();loadStats();}
 async function delW(id){if(!confirm('Remove this wallet?'))return;const r=await fetch(`${API}/admin/wallets/${id}`,{method:'DELETE',headers:ah()});const d=await r.json();if(!r.ok){toast(d.error,'er');return;}toast('Removed','ok');lWallets();}
 
-/* ── Flip Control ── */
+/* ── Flip Control (enhanced) ── */
 async function lCtrl(){
   const r=await fetch(`${API}/admin/stats`,{headers:ah()});const d=await r.json();
   sModeUI(d.settings.flipMode);
   document.getElementById('mnx').textContent=d.settings.manualNextResult||'not set';
   document.getElementById('ap').textContent=d.players.online+' online';
   document.getElementById('ge').checked=d.settings.gameEnabled;
+  if(d.settings.betsPaused){document.getElementById('pauseBtn').style.display='none';document.getElementById('resumeBtn').style.display='';}
+  else{document.getElementById('pauseBtn').style.display='';document.getElementById('resumeBtn').style.display='none';}
+  lCtrlLog();
+}
+async function lCtrlLog(){
+  try{const r=await fetch(`${API}/admin/flips?page=1&limit=20`,{headers:ah()});const d=await r.json();
+  const b=document.getElementById('ctrlLogTb');
+  if(!d.flips.length){b.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:15px;font-size:0.65rem;">No flips yet</td></tr>';return;}
+  b.innerHTML=d.flips.map(f=>`<tr>
+    <td class="ta">${f.playerPubkey.slice(0,6)}…${f.playerPubkey.slice(-4)}</td>
+    <td>${f.betSol.toFixed(4)}</td><td class="tm">${f.side}</td><td><b>${f.result}</b></td>
+    <td class="${f.playerWon?'tw2':'tl'}">${f.playerWon?'WIN':'LOSS'}</td>
+    <td class="${f.playerWon?'tg':'tn'}">${f.playerWon?'+'+f.payoutSol.toFixed(4):'—'}</td>
+    <td class="tn">${new Date(f.timestamp).toLocaleTimeString()}</td></tr>`).join('');}catch(e){}
 }
 function sModeUI(m){
   document.querySelectorAll('.mc').forEach(c=>c.classList.remove('act'));
@@ -676,8 +985,17 @@ async function sMan(v){
   document.getElementById('mnx').textContent=v||'not set';
   toast(v?'Next flip: '+v:'Cleared','ok');
 }
+async function pauseBets(){await fetch(`${API}/admin/pause`,{method:'POST',headers:ah()});document.getElementById('pauseBtn').style.display='none';document.getElementById('resumeBtn').style.display='';toast('Bets paused','ok');}
+async function resumeBets(){await fetch(`${API}/admin/resume`,{method:'POST',headers:ah()});document.getElementById('pauseBtn').style.display='';document.getElementById('resumeBtn').style.display='none';toast('Bets resumed','ok');}
+function toggleOnList(){
+  const el=document.getElementById('onList');
+  if(el.classList.contains('sh')){el.classList.remove('sh');return;}
+  el.innerHTML=cachedOnlineWallets.length?cachedOnlineWallets.map(w=>`<div class="oli">${w.slice(0,6)}…${w.slice(-4)}</div>`).join(''):'<div class="oli" style="color:var(--t3)">No players online</div>';
+  el.classList.add('sh');
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.on-dd'))document.getElementById('onList').classList.remove('sh');});
 
-/* ── Settings ── */
+/* ── Settings (enhanced) ── */
 async function lCfg(){
   const r=await fetch(`${API}/admin/settings`,{headers:ah()});const s=await r.json();
   document.getElementById('s-mn').value=s.minBet;
@@ -685,9 +1003,19 @@ async function lCfg(){
   document.getElementById('s-he').value=(s.houseEdge*100).toFixed(1);
   document.getElementById('s-nt').value=s.network;
   document.getElementById('s-to').value=s.sessionTimeoutMin;
+  document.getElementById('s-lb').value=s.lowBalanceThreshold||0.1;
+  // Load RPC config
+  try{const rr=await fetch(`${API}/admin/rpc-config`,{headers:ah()});const rc=await rr.json();
+  document.getElementById('rpc-main').value=rc.mainnetRpc||'';
+  document.getElementById('rpc-test').value=rc.testnetRpc||'';
+  document.getElementById('rpc-prov').value=rc.providerName||'';
+  document.getElementById('rpc-key').value='';
+  document.getElementById('rpc-key-mask').textContent=rc.apiKey?'Current key: '+rc.apiKey:'No key saved';
+  }catch(e){}
+  // Load treasury
+  refreshTm();
 }
 async function ss(k,v){
-  if(k==='houseEdge') v=v/100;
   const r=await fetch(`${API}/admin/settings`,{method:'POST',headers:ah(),body:JSON.stringify({[k]:v})});
   if(!r.ok){toast('Save failed','er');return;}
   toast('Saved','ok');
@@ -697,6 +1025,66 @@ async function chPw(){
   if(!pw||pw.length<4){toast('Too short','er');return;}
   await ss('adminPassword',pw);
   document.getElementById('s-pw').value='';toast('Password updated','ok');
+}
+
+/* ── RPC Config ── */
+async function testRpc(inputId,statusId){
+  const url=document.getElementById(inputId).value.trim();
+  if(!url){toast('Enter URL first','er');return;}
+  const st=document.getElementById(statusId);
+  st.innerHTML='<span style="color:var(--a3)">Testing…</span>';
+  try{
+    const r=await fetch(`${API}/admin/rpc-test`,{method:'POST',headers:ah(),body:JSON.stringify({url})});
+    const d=await r.json();
+    if(d.ok) st.innerHTML=`<span style="color:var(--e4)">✓ Connected — ${d.latency}ms</span>`;
+    else st.innerHTML=`<span style="color:var(--r2)">✗ Failed — ${d.error}</span>`;
+  }catch(e){st.innerHTML=`<span style="color:var(--r2)">✗ Error</span>`;}
+}
+async function saveRpc(){
+  const data={
+    mainnetRpc: document.getElementById('rpc-main').value.trim(),
+    testnetRpc: document.getElementById('rpc-test').value.trim(),
+    providerName: document.getElementById('rpc-prov').value.trim(),
+  };
+  const key=document.getElementById('rpc-key').value.trim();
+  if(key) data.apiKey=key;
+  const r=await fetch(`${API}/admin/rpc-config`,{method:'POST',headers:ah(),body:JSON.stringify(data)});
+  if(!r.ok){toast('Save failed','er');return;}
+  const d=await r.json();
+  document.getElementById('rpc-key').value='';
+  document.getElementById('rpc-key-mask').textContent=d.config.apiKey?'Current key: '+d.config.apiKey:'No key saved';
+  toast('RPC settings saved & reconnected','ok');
+}
+function togPw(id,btn){
+  const el=document.getElementById(id);
+  if(el.type==='password'){el.type='text';btn.textContent='🔒';}
+  else{el.type='password';btn.textContent='👁';}
+}
+
+/* ── Treasury Management ── */
+async function refreshTm(){
+  try{const r=await fetch(`${API}/admin/treasury`,{headers:ah()});const d=await r.json();
+  document.getElementById('tm-pub').textContent=d.publicKey;
+  document.getElementById('tm-bal').textContent=d.balance.toFixed(4)+' SOL';
+  }catch(e){}
+}
+function copyTmPub(){
+  const t=document.getElementById('tm-pub').textContent;
+  if(t&&t!=='—')navigator.clipboard.writeText(t);
+  toast('Copied','ok');
+}
+async function updateTmKey(){
+  const raw=document.getElementById('tm-newkey').value.trim();
+  if(!raw){toast('Paste key array','er');return;}
+  let arr;try{arr=JSON.parse(raw);}catch(e){toast('Invalid JSON array','er');return;}
+  if(!confirm('Update treasury key? This takes effect immediately.'))return;
+  const r=await fetch(`${API}/admin/treasury`,{method:'POST',headers:ah(),body:JSON.stringify({secretKeyArray:arr})});
+  const d=await r.json();
+  if(!r.ok){toast(d.error,'er');return;}
+  document.getElementById('tm-newkey').value='';
+  document.getElementById('tm-pub').textContent=d.publicKey;
+  toast('Treasury key updated','ok');
+  refreshTm();loadStats();
 }
 
 /* ── Toast ── */
