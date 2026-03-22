@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>SOLFLIP — Heads or Tails on Solana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════
+   ROOT & RESET
+════════════════════════════════ */
+:root {
+  --ink:     #060810;
+  --ink2:    #0b0d18;
+  --ink3:    #0f1120;
+  --panel:   #13152a;
+  --panel2:  #171930;
+  --line:    rgba(255,255,255,0.065);
+  --line2:   rgba(255,255,255,0.12);
+
+  /* Gold palette */
+  --g0: #8a6410;
+  --g1: #b8860b;
+  --g2: #c9a030;
+  --g3: #e8c060;
+  --g4: #f5dc90;
+  --g5: #fef0c0;
+
+  /* Emerald palette */
+  --e1: #064e2e;
+  --e2: #15803d;
+  --e3: #22c55e;
+  --e4: #4ade80;
+  --e5: #bbf7d0;
+
+  /* Red */
+  --r1: #7f1d1d;
+  --r2: #ef4444;
+  --r3: #fca5a5;
+
+  /* Text */
+  --t1: #eef0f8;
+  --t2: #8a90b0;
+  --t3: #4a5070;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; scroll-behavior:smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--ink);
+  color: var(--t1);
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ════════════════════════════════
+   ATMOSPHERIC BACKGROUND
+════════════════════════════════ */
+.atmo {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+.atmo-glow1 {
+  position: absolute;
+  width: 800px; height: 600px;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(201,160,48,0.10) 0%, transparent 70%);
+  animation: gFloat 8s ease-in-out infinite;
+}
+.atmo-glow2 {
+  position: absolute;
+  width: 500px; height: 400px;
+  bottom: 0; right: -100px;
+  background: radial-gradient(ellipse, rgba(34,197,94,0.06) 0%, transparent 65%);
+  animation: gFloat 11s ease-in-out infinite reverse;
+}
+@keyframes gFloat { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(-30px);} }
+.atmo-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 50%, black 20%, transparent 100%);
+}
+.atmo-noise {
+  position: absolute; inset: 0; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ════════════════════════════════
+   HEADER
+════════════════════════════════ */
+header {
+  position: sticky; top: 0; z-index: 100;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(16px,4vw,48px);
+  background: rgba(6,8,16,0.88);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--line);
+}
+.logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--g3);
+  text-shadow: 0 0 40px rgba(232,192,96,0.35);
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.logo-gem {
+  width: 26px; height: 26px;
+  background: linear-gradient(135deg, var(--g1), var(--g3), var(--g5));
+  clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+  animation: gemSpin 6s linear infinite;
+}
+@keyframes gemSpin { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.3);} }
+
+.hdr-right { display:flex; align-items:center; gap:8px; }
+
+.net-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+  color: var(--e4);
+  display: flex; align-items: center; gap: 5px;
+}
+.net-dot { width:5px; height:5px; border-radius:50%; background:var(--e3); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+
+.wallet-info {
+  display: none; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 8px;
+  background: var(--panel2); border: 1px solid var(--line2);
+}
+.wi-addr { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--t2); }
+.wi-bal  { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--g3); font-weight:500; }
+.wi-sep  { color:var(--t3); font-size:0.6rem; }
+
+#connectBtn {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 9px 18px; border-radius: 8px; border: none;
+  background: linear-gradient(135deg, var(--g0) 0%, var(--g2) 50%, var(--g3) 100%);
+  color: #07050a;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 2px 16px rgba(201,160,48,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  position: relative; overflow: hidden;
+}
+#connectBtn::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+  transform: translateX(-100%); transition: transform 0.4s;
+}
+#connectBtn:hover::after { transform: translateX(100%); }
+#connectBtn:hover { box-shadow: 0 4px 28px rgba(201,160,48,0.5), inset 0 1px 0 rgba(255,255,255,0.15); transform: translateY(-1px); }
+#connectBtn.on { background: linear-gradient(135deg, var(--e1), var(--e2), var(--e3)); color: #fff; box-shadow: 0 2px 16px rgba(34,197,94,0.3); }
+
+/* ════════════════════════════════
+   PAGE LAYOUT
+════════════════════════════════ */
+.page {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: clamp(20px,3vw,40px) clamp(16px,4vw,48px);
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* ════════════════════════════════
+   LEFT COLUMN
+════════════════════════════════ */
+.left { display:flex; flex-direction:column; gap:0; }
+
+/* Quick Stats */
+.quick-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.qs-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 10px;
+  position: relative; overflow: hidden;
+  min-width: 0;
+}
+.qs-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(201,160,48,0.3), transparent);
+}
+.qs-val {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  font-weight: 700; line-height: 1; color: var(--g3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qs-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; color: var(--t3);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-top: 4px;
+}
+/* Desktop: hide quick-stats from left column (moved to right) */
+@media (min-width: 901px) {
+  .left .quick-stats { display: none; }
+}
+
+/* ─── COIN STAGE ─── */
+.coin-stage {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(20px, 3vw, 36px) 24px;
+  display: flex; flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative; overflow: hidden;
+  min-height: 0;
+  flex: 1;
+}
+.coin-stage::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(201,160,48,0.06), transparent 60%);
+}
+.coin-stage::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent 0%, var(--g2) 30%, var(--g4) 50%, var(--g2) 70%, transparent 100%);
+  opacity: 0.5;
+}
+
+/* Coin wrapper for 3D */
+.coin-wrap {
+  perspective: 1200px;
+  width: clamp(160px,28vw,220px);
+  height: clamp(160px,28vw,220px);
+}
+.coin-inner {
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  position: relative;
+  transition: transform 0.1s;
+}
+.coin-inner.do-flip {
+  animation: coinToss 2.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.coin-inner.show-tails { transform: rotateY(180deg); }
+@keyframes coinToss {
+  0%   { transform: rotateY(0deg)    translateY(0px)    scale(1); }
+  15%  { transform: rotateY(270deg)  translateY(-40px)  scale(1.05); }
+  45%  { transform: rotateY(810deg)  translateY(-60px)  scale(1.08); }
+  75%  { transform: rotateY(1440deg) translateY(-20px)  scale(1.02); }
+  100% { transform: rotateY(1800deg) translateY(0px)    scale(1); }
+}
+@keyframes coinTossTails {
+  0%   { transform: rotateY(0deg)    translateY(0px); }
+  100% { transform: rotateY(1980deg) translateY(0px); }
+}
+
+.coin-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px rgba(0,0,0,0.6),
+    0 20px 60px rgba(0,0,0,0.8),
+    inset 0 2px 4px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.4);
+}
+.coin-face.tails-face { transform: rotateY(180deg); }
+
+/* ── HEADS SVG ── */
+.heads-svg, .tails-svg { width:100%; height:100%; border-radius:50%; display:block; }
+
+/* Coin ambient glow */
+.coin-glow {
+  position: absolute;
+  width: clamp(200px,35vw,280px); height: clamp(200px,35vw,280px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,160,48,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  animation: coinGlowPulse 3s ease infinite;
+}
+@keyframes coinGlowPulse { 0%,100%{opacity:0.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.1);} }
+
+.coin-shadow-el {
+  width: clamp(130px,22vw,180px); height: 18px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%);
+  border-radius: 50%; margin-top: -20px;
+}
+
+/* Result display */
+.result-box {
+  text-align: center; min-height: 72px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.result-main {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900; line-height: 1;
+  letter-spacing: 0.06em;
+  opacity: 0; transform: translateY(16px) scale(0.9);
+  transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+.result-main.show { opacity:1; transform:translateY(0) scale(1); }
+.result-main.win  { color: var(--g3); text-shadow: 0 0 40px rgba(232,192,96,0.5), 0 0 80px rgba(232,192,96,0.2); }
+.result-main.lose { color: var(--t3); }
+
+.result-sub {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+  opacity: 0; transition: opacity 0.4s 0.25s;
+}
+.result-sub.show { opacity:1; }
+.result-sub.win  { color: var(--e4); }
+.result-sub.lose { color: var(--r2); }
+
+/* TX links */
+.tx-links {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  opacity: 0; transition: opacity 0.4s 0.5s;
+}
+.tx-links.show { opacity:1; }
+.tx-link {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  color: var(--t3); text-decoration: none;
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.tx-link:hover { color: var(--g3); background: rgba(201,160,48,0.08); }
+
+/* Particles canvas */
+#particleCanvas {
+  position: absolute; inset: 0; pointer-events: none; border-radius: 20px;
+}
+
+/* ─── HISTORY (left column — hidden on desktop) ─── */
+.history-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px; padding: 18px;
+}
+@media (min-width: 901px) {
+  .history-panel { display: none; }
+}
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--t3);
+}
+.clear-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  color: var(--t3); background: none; border: none; cursor: pointer;
+  padding: 3px 8px; border-radius: 4px;
+  transition: all 0.15s;
+}
+.clear-btn:hover { color: var(--r2); background: rgba(239,68,68,0.07); }
+
+.hist-table { width:100%; border-collapse:collapse; }
+.hist-table th {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.56rem;
+  color: var(--t3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 8px 8px; text-align: left; border-bottom: 1px solid var(--line);
+}
+.hist-table th:last-child { text-align:right; }
+.hist-table td {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+  color: var(--t2); padding: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.hist-table tr:last-child td { border-bottom: none; }
+.hist-table tr { transition: background 0.1s; }
+.hist-table tr:hover td { background: rgba(255,255,255,0.015); }
+.hist-addr { color: var(--g2) !important; }
+.hist-win  { color: var(--e4) !important; font-weight:600; }
+.hist-loss { color: var(--r2) !important; }
+.hist-pos  { color: var(--e4) !important; text-align:right; }
+.hist-neg  { color: var(--r3) !important; text-align:right; }
+.hist-pill {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em;
+}
+.pill-w { background: rgba(232,192,96,0.12); color: var(--g3); }
+.pill-l { background: rgba(255,255,255,0.04); color: var(--t3); }
+.hist-empty {
+  text-align: center; padding: 32px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  color: var(--t3); letter-spacing: 0.1em;
+}
+
+/* ════════════════════════════════
+   RIGHT COLUMN — BET PANEL
+════════════════════════════════ */
+.bet-panel { display: flex; flex-direction: column; gap: 14px; }
+
+/* Glass card */
+.glass-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px; padding: 20px;
+  position: relative; overflow: hidden;
+}
+.glass-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.card-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 14px;
+}
+
+/* Balance */
+.bal-big {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 700; color: var(--g3); line-height: 1;
+  letter-spacing: -0.01em;
+}
+.bal-unit { font-size: 1rem; color: var(--t3); margin-left: 6px; }
+.bal-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; color: var(--t3); margin-top: 6px;
+}
+
+/* Bet input */
+.bet-field {
+  position: relative; margin-bottom: 10px;
+}
+.bet-field input {
+  width: 100%;
+  background: var(--ink3);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  padding: 14px 58px 14px 16px;
+  color: var(--t1);
+  font-family: 'Unbounded', monospace;
+  font-size: 1.1rem; font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
+}
+.bet-field input::-webkit-outer-spin-button,
+.bet-field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.bet-field input:focus {
+  border-color: var(--g2);
+  box-shadow: 0 0 0 3px rgba(201,160,48,0.12);
+}
+.bet-cur {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  font-family: 'Unbounded', monospace; font-size: 0.65rem; font-weight: 700;
+  color: var(--g2); letter-spacing: 0.05em;
+}
+
+/* Quick amounts */
+.quick-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  margin-bottom: 8px;
+}
+.quick-chip {
+  padding: 8px 4px; border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.02);
+  color: var(--t2); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.quick-chip:hover {
+  border-color: var(--g2); color: var(--g3);
+  background: rgba(201,160,48,0.07);
+}
+.adj-row { display: flex; gap: 6px; }
+.adj-btn {
+  flex:1; padding: 8px; border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.02);
+  color: var(--t2); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.adj-btn:hover { border-color: var(--line2); color: var(--t1); }
+
+/* Side selector */
+.side-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.side-card {
+  border: 2px solid var(--line);
+  border-radius: 12px; padding: 16px 10px;
+  cursor: pointer; background: rgba(255,255,255,0.01);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  transition: all 0.2s; position: relative; overflow: hidden;
+}
+.side-card::after {
+  content:''; position:absolute; inset:0;
+  opacity: 0; transition: opacity 0.2s;
+}
+.side-card.heads-card::after { background: radial-gradient(ellipse at 50% 50%, rgba(201,160,48,0.08), transparent 70%); }
+.side-card.tails-card::after { background: radial-gradient(ellipse at 50% 50%, rgba(34,197,94,0.07), transparent 70%); }
+.side-card:hover::after, .side-card.chosen::after { opacity:1; }
+.side-card.heads-card:hover, .side-card.heads-card.chosen {
+  border-color: var(--g2); box-shadow: 0 0 0 1px rgba(201,160,48,0.2);
+}
+.side-card.tails-card:hover, .side-card.tails-card.chosen {
+  border-color: var(--e3); box-shadow: 0 0 0 1px rgba(34,197,94,0.2);
+}
+.side-mini {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.side-name {
+  font-family: 'Unbounded', sans-serif; font-size: 0.62rem;
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--t2); transition: color 0.2s;
+}
+.side-card.heads-card.chosen .side-name { color: var(--g3); }
+.side-card.tails-card.chosen .side-name { color: var(--e4); }
+.side-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--line2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; color: transparent;
+  transition: all 0.2s;
+}
+.side-card.heads-card.chosen .side-check { background: var(--g2); border-color: var(--g2); color: #050300; }
+.side-card.tails-card.chosen .side-check { background: var(--e3); border-color: var(--e3); color: #001008; }
+
+/* Payout info */
+.payout-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; border-radius: 8px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--line);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+}
+.pr-label { color: var(--t3); }
+.pr-val { color: var(--g3); font-weight: 500; }
+
+/* Step indicator */
+.steps-wrap { display: none; flex-direction: column; gap: 5px; }
+.steps-wrap.visible { display: flex; }
+.step-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.67rem;
+  color: var(--t3); transition: all 0.2s;
+}
+.step-row.active {
+  border-color: rgba(201,160,48,0.2);
+  background: rgba(201,160,48,0.04);
+  color: var(--g3);
+}
+.step-row.done {
+  border-color: rgba(34,197,94,0.15);
+  background: rgba(34,197,94,0.03);
+  color: var(--e4);
+}
+.step-row.fail {
+  border-color: rgba(239,68,68,0.15);
+  background: rgba(239,68,68,0.03);
+  color: var(--r2);
+}
+.step-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.step-row.active .step-dot { animation: pulse 0.6s infinite; }
+.step-row:not(.active) .step-dot, .step-row:not(.done) .step-dot, .step-row:not(.fail) .step-dot { display:none; }
+.step-row.done .step-dot, .step-row.fail .step-dot, .step-row.active .step-dot { display:block; }
+
+/* THE FLIP BUTTON */
+#flipBtn {
+  width: 100%; padding: 18px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.82rem; font-weight: 900;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: #060408;
+  border: none; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(160deg, var(--g0) 0%, var(--g2) 35%, var(--g4) 55%, var(--g3) 80%, var(--g1) 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.2) inset,
+    0 -1px 0 rgba(0,0,0,0.3) inset,
+    0 6px 32px rgba(201,160,48,0.3);
+  position: relative; overflow: hidden;
+  transition: all 0.25s;
+}
+#flipBtn::before {
+  content: '';
+  position: absolute; top: -50%; left: -60%;
+  width: 40%; height: 200%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: rotate(15deg);
+  transition: left 0.5s;
+}
+#flipBtn:hover:not(:disabled)::before { left: 130%; }
+#flipBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.3) inset, 0 12px 48px rgba(201,160,48,0.45);
+}
+#flipBtn:active:not(:disabled) { transform: translateY(0); }
+#flipBtn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+
+/* ════════════════════════════════
+   OVERLAYS
+════════════════════════════════ */
+/* Win flash */
+.win-flash { position:fixed; inset:0; z-index:200; pointer-events:none; opacity:0; }
+.win-flash.fire {
+  animation: winFlash 1.2s ease forwards;
+}
+@keyframes winFlash {
+  0%  { opacity:0; background:radial-gradient(ellipse at 50% 30%, rgba(232,192,96,0.2), transparent 60%); }
+  20% { opacity:1; }
+  100%{ opacity:0; }
+}
+.lose-flash { position:fixed; inset:0; z-index:200; pointer-events:none; opacity:0; }
+.lose-flash.fire {
+  animation: loseFlash 0.5s ease forwards;
+}
+@keyframes loseFlash {
+  0%  { opacity:0; background:rgba(239,68,68,0.06); }
+  25% { opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  z-index: 500;
+  background: var(--panel2);
+  border: 1px solid var(--line2);
+  border-radius: 10px; padding: 11px 22px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+.toast.up { transform: translateX(-50%) translateY(0); }
+.toast.ok { border-color:rgba(34,197,94,0.3); color:var(--e4); }
+.toast.err { border-color:rgba(239,68,68,0.3); color:var(--r3); }
+
+/* ════════════════════════════════
+   LIVE TICKER STRIP
+════════════════════════════════ */
+.live-ticker {
+  position: relative; z-index: 99;
+  width: 100%;
+  background: rgba(6,8,16,0.75);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+.live-indicator {
+  position: absolute; left: 0; top: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px;
+  background: linear-gradient(90deg, rgba(6,8,16,0.95) 70%, transparent 100%);
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.55rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--r2);
+  white-space: nowrap;
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--r2);
+  animation: livePulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(239,68,68,0.6);
+}
+@keyframes livePulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.4; transform:scale(0.6); }
+}
+.ticker-track {
+  display: flex; align-items: center; gap: 24px;
+  animation: tickerScroll 30s linear infinite;
+  padding-left: 80px;
+  white-space: nowrap;
+}
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+}
+.ticker-badge {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.5rem; font-weight: 900;
+  flex-shrink: 0;
+}
+.ticker-badge.tb-h {
+  background: linear-gradient(135deg, var(--g1), var(--g3));
+  color: #07050a;
+}
+.ticker-badge.tb-t {
+  background: linear-gradient(135deg, var(--e1), var(--e3));
+  color: #001008;
+}
+.ticker-addr { color: var(--t3); }
+.ticker-win  { color: var(--e4); font-weight: 600; }
+.ticker-loss { color: var(--r2); font-weight: 600; }
+.ticker-sep  { color: var(--t3); opacity: 0.3; font-size: 0.5rem; }
+
+/* ════════════════════════════════
+   FULL-WIDTH MY FLIP HISTORY
+════════════════════════════════ */
+.my-history-section {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 clamp(16px,4vw,48px) clamp(20px,3vw,40px);
+}
+.my-history-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px; padding: 18px;
+}
+/* My history table: center outcome, pad bet */
+.my-history-panel .hist-table td:first-child { padding-left: 14px; }
+.my-history-panel .hist-table th:first-child { padding-left: 14px; }
+.my-history-panel .hist-table td:nth-child(3),
+.my-history-panel .hist-table th:nth-child(3) { text-align: center; }
+.my-history-connect {
+  text-align: center; padding: 40px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; color: var(--t3);
+  letter-spacing: 0.06em;
+}
+.my-history-connect .mhc-icon {
+  font-size: 1.6rem; margin-bottom: 10px; opacity: 0.5;
+}
+.my-history-connect .mhc-text {
+  color: var(--t3);
+}
+.my-history-connect .mhc-btn {
+  display: inline-block; margin-top: 12px;
+  padding: 8px 18px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--g0), var(--g2), var(--g3));
+  color: #07050a; font-family: 'Unbounded', sans-serif;
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; border: none;
+  box-shadow: 0 2px 12px rgba(201,160,48,0.25);
+  transition: all 0.2s;
+}
+.my-history-connect .mhc-btn:hover {
+  box-shadow: 0 4px 20px rgba(201,160,48,0.4);
+  transform: translateY(-1px);
+}
+
+/* ════════════════════════════════
+   MOBILE — PREMIUM APP LAYOUT
+   Screens below 900px
+════════════════════════════════ */
+@media (max-width: 900px) {
+  /* ─── Page grid → single column ─── */
+  .page {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 14px;
+    align-items: start;
+  }
+
+  /* ─── Section order ─── */
+  /* Ticker is already above .page in the DOM — stays at top */
+  .left  { order: 1; gap: 14px; display: flex; flex-direction: column; }
+  .left .quick-stats { order: 1; }
+  .left .coin-stage { order: 2; }
+  .left .history-panel { order: 3; }
+  .bet-panel { order: 2; gap: 12px; }
+
+  /* ─── Header tweaks ─── */
+  header { height: 52px; padding: 0 14px; }
+  .logo { font-size: 0.8rem; gap: 7px; }
+  .logo-gem { width: 22px; height: 22px; }
+  .net-badge { display: none; }
+  .hdr-right { gap: 6px; }
+  .wallet-info { padding: 4px 8px; border-radius: 6px; }
+  .wi-addr { font-size: 0.6rem; }
+  .wi-bal  { font-size: 0.6rem; }
+  #connectBtn { font-size: 0.56rem; padding: 8px 14px; border-radius: 7px; }
+
+  /* ─── Section 1: LIVE TICKER ─── */
+  .live-ticker {
+    display: flex !important;
+    height: 44px;
+    background: rgba(6,8,16,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .live-indicator { padding: 0 10px; font-size: 0.5rem; }
+  .ticker-item { font-size: 0.6rem; gap: 6px; }
+  .ticker-badge { width: 20px; height: 20px; font-size: 0.45rem; }
+  .ticker-track { gap: 18px; padding-left: 65px; }
+
+  /* ─── Section 2: COIN STAGE ─── */
+  .coin-stage {
+    padding: 20px 14px;
+    min-height: unset;
+    flex: unset;
+    border-radius: 16px;
+    gap: 14px;
+  }
+  .coin-wrap {
+    width: 240px;
+    height: 240px;
+  }
+  .coin-glow {
+    width: 220px; height: 220px;
+  }
+  .coin-shadow-el {
+    width: 140px; margin-top: -14px;
+  }
+  .result-box { min-height: 56px; gap: 4px; }
+  .result-main { font-size: 1.5rem; }
+  .result-sub { font-size: 0.72rem; }
+  .tx-links { gap: 3px; }
+  .tx-link { font-size: 0.55rem; padding: 2px 6px; }
+
+  /* ─── Section 3: STATS ROW ─── */
+  .left .quick-stats { display: grid !important; }
+  .quick-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .qs-card {
+    padding: 10px 8px;
+    border-radius: 8px;
+  }
+  .qs-val {
+    font-size: 0.95rem;
+  }
+  .qs-lbl {
+    font-size: 0.46rem;
+    margin-top: 3px;
+  }
+  /* Hide right-panel stats on mobile */
+  .bet-panel .quick-stats { display: none !important; }
+
+  /* ─── Section 4: GAME CONTROLS ─── */
+  .glass-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .card-label {
+    font-size: 0.52rem;
+    margin-bottom: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Balance card */
+  .bal-big {
+    font-size: 1.6rem;
+  }
+  .bal-unit { font-size: 0.85rem; }
+  .bal-hint { font-size: 0.6rem; margin-top: 4px; }
+
+  /* Bet input */
+  .bet-field input {
+    padding: 12px 50px 12px 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  .bet-cur { font-size: 0.6rem; right: 12px; }
+  .quick-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+  .quick-chip {
+    padding: 10px 4px;
+    min-height: 44px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .adj-row { gap: 5px; }
+  .adj-btn {
+    padding: 10px;
+    min-height: 44px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Side selector — large touch-friendly cards */
+  .side-grid { gap: 8px; }
+  .side-card {
+    min-height: 80px;
+    padding: 14px 8px;
+    border-radius: 10px;
+    justify-content: center;
+  }
+  .side-mini { width: 42px; height: 42px; }
+  .side-name { font-size: 0.58rem; }
+  .side-check { width: 14px; height: 14px; }
+
+  /* Payout row */
+  .payout-row {
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+  }
+
+  /* Steps (transaction indicators) */
+  .step-row {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 0.6rem;
+  }
+
+  /* FLIP BUTTON — premium game button */
+  #flipBtn {
+    padding: 16px;
+    min-height: 56px;
+    font-size: 0.78rem;
+    border-radius: 10px;
+    letter-spacing: 0.15em;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(0,0,0,0.3) inset,
+      0 8px 32px rgba(201,160,48,0.35);
+  }
+
+  /* ─── Section 5: MY FLIP HISTORY ─── */
+  .my-history-section {
+    display: block !important;
+    padding: 0 14px 20px;
+  }
+  .my-history-panel {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .my-history-panel .section-title { font-size: 0.55rem; }
+  .my-history-panel .hist-table th { font-size: 0.48rem; padding: 0 6px 6px; }
+  .my-history-panel .hist-table td { font-size: 0.62rem; padding: 7px 6px; }
+  /* Hide # and Wallet columns on mobile */
+  .my-history-panel .hist-table th:nth-child(1),
+  .my-history-panel .hist-table td:nth-child(1) { display: none; }
+  .my-history-panel .hist-table th:nth-child(2),
+  .my-history-panel .hist-table td:nth-child(2) { display: none; }
+  .my-history-connect { padding: 28px 14px; font-size: 0.65rem; }
+
+  /* Left-column history panel */
+  .history-panel { display: none; }
+
+  /* ─── Toast on mobile ─── */
+  .toast {
+    font-size: 0.65rem;
+    padding: 9px 18px;
+    border-radius: 8px;
+    bottom: 16px;
+  }
+
+  /* ─── Atmospheric ─── */
+  .atmo-glow1 { width: 400px; height: 300px; top: -100px; }
+  .atmo-glow2 { width: 250px; height: 200px; }
+}
+
+/* ─── Extra small (< 520px) ─── */
+@media (max-width: 520px) {
+  header { padding: 0 10px; height: 48px; }
+  .logo { font-size: 0.72rem; gap: 6px; }
+  .logo-gem { width: 20px; height: 20px; }
+  .wallet-info { display: none; }
+  #connectBtn { font-size: 0.52rem; padding: 7px 12px; }
+  .hdr-right { gap: 5px; }
+
+  .page { padding: 10px; gap: 10px; }
+
+  .live-ticker { height: 40px; }
+  .ticker-item { font-size: 0.55rem; }
+  .ticker-badge { width: 18px; height: 18px; font-size: 0.42rem; }
+
+  .coin-stage { min-height: 280px; padding: 16px 10px 14px; border-radius: 14px; }
+  .coin-wrap { width: 155px; height: 155px; }
+  .coin-glow { width: 190px; height: 190px; }
+  .result-main { font-size: 1.3rem; }
+  .result-sub { font-size: 0.66rem; }
+
+  .quick-stats { gap: 5px; }
+  .qs-card { padding: 8px 6px; border-radius: 7px; }
+  .qs-val { font-size: 0.85rem; }
+  .qs-lbl { font-size: 0.42rem; }
+
+  .glass-card { padding: 12px; border-radius: 10px; }
+  .card-label { font-size: 0.48rem; margin-bottom: 8px; }
+  .bal-big { font-size: 1.4rem; }
+
+  .quick-row { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .quick-chip { font-size: 0.6rem; min-height: 40px; }
+  .adj-btn { font-size: 0.6rem; min-height: 40px; }
+
+  .side-card { min-height: 72px; }
+  .side-mini { width: 36px; height: 36px; }
+  .side-name { font-size: 0.52rem; }
+
+  #flipBtn { min-height: 52px; font-size: 0.72rem; }
+
+  .my-history-section { padding: 0 10px 16px; }
+  .my-history-panel { padding: 12px; }
+  .my-history-panel .hist-table td { font-size: 0.58rem; padding: 6px 5px; }
+  .my-history-panel .hist-table th { font-size: 0.44rem; }
+}
+
+/* ════════════════════════════════
+   WALLET SELECT MODAL
+════════════════════════════════ */
+.wm-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.wm-overlay.open { display: flex; }
+.wm-box {
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 20px; padding: 28px;
+  width: 100%; max-width: 380px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.wm-close {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; color: var(--t3);
+  font-size: 1.2rem; cursor: pointer; padding: 4px 8px;
+  border-radius: 6px; transition: all 0.15s;
+}
+.wm-close:hover { color: var(--t1); background: rgba(255,255,255,0.05); }
+.wm-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--t2); margin-bottom: 20px; text-align: center;
+}
+.wm-opts { display: flex; flex-direction: column; gap: 10px; }
+.wm-opt {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.015);
+  cursor: pointer; transition: all 0.2s;
+  min-height: 60px;
+}
+.wm-opt:hover {
+  border-color: var(--line2);
+  background: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+}
+.wm-opt:active { transform: translateY(0); }
+.wm-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.wm-icon.phantom-ic { background: linear-gradient(135deg, #7b3fe4, #ab9ff2); }
+.wm-icon.solflare-ic { background: linear-gradient(135deg, #e87a1c, #fcc06a); }
+.wm-icon svg { width: 24px; height: 24px; }
+.wm-info { flex: 1; min-width: 0; }
+.wm-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem; font-weight: 600; color: var(--t1);
+}
+.wm-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; color: var(--t3); margin-top: 2px;
+}
+.wm-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+  letter-spacing: 0.06em; flex-shrink: 0;
+}
+.wm-badge.detected { background: rgba(34,197,94,0.12); color: var(--e4); }
+.wm-badge.openapp { background: rgba(201,160,48,0.12); color: var(--g3); }
+</style>
+</head>
+<body>
+
+<div class="atmo">
+  <div class="atmo-glow1"></div>
+  <div class="atmo-glow2"></div>
+  <div class="atmo-grid"></div>
+  <div class="atmo-noise"></div>
+</div>
+
+<div class="win-flash"  id="winFlash"></div>
+<div class="lose-flash" id="loseFlash"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <a class="logo" href="#">
+    <div class="logo-gem"></div>
+    SOLFLIP
+  </a>
+  <div class="hdr-right">
+    <div class="net-badge"><span class="net-dot"></span><span id="netLabel">TESTNET</span></div>
+    <div class="wallet-info" id="walletInfo">
+      <span class="wi-addr" id="wiAddr">—</span>
+      <span class="wi-sep">·</span>
+      <span class="wi-bal"  id="wiBal">0.000</span>
+      <span class="wi-sep">SOL</span>
+    </div>
+    <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</header>
+
+<!-- ═══ WALLET SELECT MODAL ═══ -->
+<div class="wm-overlay" id="wmOverlay" onclick="if(event.target===this)closeWM()">
+  <div class="wm-box">
+    <button class="wm-close" onclick="closeWM()">✕</button>
+    <div class="wm-title">Connect Wallet</div>
+    <div class="wm-opts">
+      <div class="wm-opt" onclick="selectWallet('phantom')">
+        <div class="wm-icon phantom-ic">
+          <svg viewBox="0 0 128 128" fill="none"><path d="M108.7 66.3C107 61.2 102.7 57 97 56c-2.2-.4-4.5-.3-6.7.2-3 .7-5.7 2.3-7.8 4.5-2.5 2.7-4 6-4.3 9.6-.1 1.4 0 2.8.3 4.2.5 2.2 1.5 4.2 3 5.9 2.4 2.7 5.7 4.3 9.2 4.5 4.7.2 9.2-1.9 12-5.4 2.5-3.1 3.6-7.1 3-10.8-.3-1.5-.8-3-1.5-4.4zM64 16C35.3 16 12 39.3 12 68s23.3 52 52 52 52-23.3 52-52S92.7 16 64 16zm34.5 58.1c-1 5.2-4 9.8-8.2 13-4.3 3.3-9.7 5-15.1 4.6-5-.4-9.6-2.6-13.1-6.2-2.5-2.6-4.3-5.7-5.2-9.1-.7-2.6-.9-5.4-.6-8.1.5-5.2 2.7-10.1 6.3-13.8 3.2-3.3 7.3-5.5 11.8-6.4 3.3-.6 6.6-.5 9.8.5 5 1.5 9.2 4.8 12 9.2 3 4.7 4.3 10.4 3.3 16.3z" fill="white"/></svg>
+        </div>
+        <div class="wm-info">
+          <div class="wm-name">Phantom</div>
+          <div class="wm-sub">Popular Solana wallet</div>
+        </div>
+        <span class="wm-badge" id="wmPhBadge">—</span>
+      </div>
+      <div class="wm-opt" onclick="selectWallet('solflare')">
+        <div class="wm-icon solflare-ic">
+          <svg viewBox="0 0 128 128" fill="none"><circle cx="64" cy="64" r="36" stroke="white" stroke-width="6" fill="none"/><path d="M64 20V8M64 120v-12M20 64H8M120 64h-12M34 34L25 25M103 103l-9-9M34 94l-9 9M103 25l-9 9" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="wm-info">
+          <div class="wm-name">Solflare</div>
+          <div class="wm-sub">Solana DeFi wallet</div>
+        </div>
+        <span class="wm-badge" id="wmSfBadge">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LIVE TICKER ═══ -->
+<div class="live-ticker" id="liveTicker">
+  <div class="live-indicator">
+    <span class="live-dot"></span>
+    LIVE
+  </div>
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-item"><span class="ticker-addr" style="opacity:0.4">Waiting for flips…</span></span>
+  </div>
+</div>
+
+<!-- ═══ PAGE ═══ -->
+<div class="page">
+
+  <!-- ═══ LEFT ═══ -->
+  <div class="left">
+
+    <!-- Quick stats (visible on mobile only) -->
+    <div class="quick-stats">
+      <div class="qs-card">
+        <div class="qs-val qs-val-flips">0</div>
+        <div class="qs-lbl">Total Flips</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-wr" style="color:var(--t2)">—</div>
+        <div class="qs-lbl">Win Rate</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-pnl" style="color:var(--t2)">±0.000</div>
+        <div class="qs-lbl">P&amp;L (SOL)</div>
+      </div>
+    </div>
+
+    <!-- Coin stage -->
+    <div class="coin-stage">
+      <canvas id="particleCanvas"></canvas>
+
+      <div class="coin-glow"></div>
+
+      <div class="coin-wrap">
+        <div class="coin-inner" id="coinInner">
+
+          <!-- HEADS face -->
+          <div class="coin-face">
+            <svg class="heads-svg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="hBase" cx="40%" cy="30%" r="70%">
+                  <stop offset="0%"   stop-color="#fff5d0"/>
+                  <stop offset="25%"  stop-color="#e8c060"/>
+                  <stop offset="55%"  stop-color="#c9a030"/>
+                  <stop offset="80%"  stop-color="#9a7010"/>
+                  <stop offset="100%" stop-color="#5a3d05"/>
+                </radialGradient>
+                <radialGradient id="hFace" cx="42%" cy="35%" r="65%">
+                  <stop offset="0%"   stop-color="#f5dc90"/>
+                  <stop offset="40%"  stop-color="#d4a832"/>
+                  <stop offset="80%"  stop-color="#a07820"/>
+                  <stop offset="100%" stop-color="#7a5c12"/>
+                </radialGradient>
+                <radialGradient id="hSheen" cx="35%" cy="28%" r="50%">
+                  <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                </radialGradient>
+                <filter id="hShadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.5)"/>
+                </filter>
+                <linearGradient id="rimH" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#fff3a0"/>
+                  <stop offset="50%"  stop-color="#8a6410"/>
+                  <stop offset="100%" stop-color="#f0d070"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Outer rim with gradient border -->
+              <circle cx="110" cy="110" r="108" fill="url(#hBase)"/>
+              <!-- Rim tick marks -->
+              <g stroke="#c9a030" stroke-width="2" stroke-opacity="0.5">
+                <line x1="110" y1="4" x2="110" y2="12"/>
+                <line x1="110" y1="208" x2="110" y2="216"/>
+                <line x1="4" y1="110" x2="12" y2="110"/>
+                <line x1="208" y1="110" x2="216" y2="110"/>
+                <line x1="37" y1="27" x2="43" y2="33"/>
+                <line x1="183" y1="27" x2="177" y2="33"/>
+                <line x1="37" y1="193" x2="43" y2="187"/>
+                <line x1="183" y1="193" x2="177" y2="187"/>
+              </g>
+              <!-- Inner raised face -->
+              <circle cx="110" cy="110" r="96" fill="url(#hFace)"/>
+              <!-- Face border -->
+              <circle cx="110" cy="110" r="96" fill="none" stroke="rgba(255,240,160,0.25)" stroke-width="1.5"/>
+              <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(90,60,5,0.4)" stroke-width="1"/>
+
+              <!-- SOL "S" logo bars (stylized like real Solana) -->
+              <g filter="url(#hShadow)" transform="translate(110,110)">
+                <!-- Solana-style stacked parallelogram bars -->
+                <rect x="-28" y="-26" width="56" height="10" rx="2" fill="#fef0c0" fill-opacity="0.95" transform="skewX(-12)"/>
+                <rect x="-28" y="-8"  width="56" height="10" rx="2" fill="#fef0c0" fill-opacity="0.88" transform="skewX(-12)"/>
+                <rect x="-28" y="10"  width="56" height="10" rx="2" fill="#fef0c0" fill-opacity="0.95" transform="skewX(-12)"/>
+              </g>
+
+              <!-- Sheen highlight -->
+              <ellipse cx="84" cy="78" rx="34" ry="22" fill="url(#hSheen)" transform="rotate(-30 84 78)"/>
+
+              <!-- "SOLANA" arc top -->
+              <path id="htA" d="M110,110 m-78,0 a78,78 0 0,1 156,0" fill="none"/>
+              <text font-family="Georgia,serif" font-size="10" font-weight="bold" letter-spacing="4" fill="#fef0c0" fill-opacity="0.65">
+                <textPath href="#htA" startOffset="14%">SOLANA NETWORK</textPath>
+              </text>
+              <!-- "HEADS" arc bottom -->
+              <path id="hbA" d="M110,110 m-68,0 a68,68 0 0,0 136,0" fill="none"/>
+              <text font-family="Georgia,serif" font-size="9" letter-spacing="6" fill="#fef0c0" fill-opacity="0.5">
+                <textPath href="#hbA" startOffset="20%">H E A D S</textPath>
+              </text>
+
+              <!-- Edge rim highlight -->
+              <circle cx="110" cy="110" r="108" fill="none" stroke="url(#rimH)" stroke-width="1.5" stroke-opacity="0.6"/>
+            </svg>
+          </div>
+
+          <!-- TAILS face -->
+          <div class="coin-face tails-face">
+            <svg class="tails-svg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="tBase" cx="40%" cy="30%" r="70%">
+                  <stop offset="0%"   stop-color="#d0ffe8"/>
+                  <stop offset="25%"  stop-color="#4ade80"/>
+                  <stop offset="55%"  stop-color="#22c55e"/>
+                  <stop offset="80%"  stop-color="#15803d"/>
+                  <stop offset="100%" stop-color="#052e16"/>
+                </radialGradient>
+                <radialGradient id="tFace" cx="42%" cy="35%" r="65%">
+                  <stop offset="0%"   stop-color="#86efac"/>
+                  <stop offset="40%"  stop-color="#22c55e"/>
+                  <stop offset="80%"  stop-color="#166534"/>
+                  <stop offset="100%" stop-color="#052e16"/>
+                </radialGradient>
+                <radialGradient id="tSheen" cx="35%" cy="28%" r="50%">
+                  <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                </radialGradient>
+                <filter id="tShadow" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.5)"/>
+                </filter>
+                <linearGradient id="rimT" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#bbf7d0"/>
+                  <stop offset="50%"  stop-color="#064e2e"/>
+                  <stop offset="100%" stop-color="#4ade80"/>
+                </linearGradient>
+              </defs>
+
+              <circle cx="110" cy="110" r="108" fill="url(#tBase)"/>
+              <!-- Rim ticks -->
+              <g stroke="#22c55e" stroke-width="2" stroke-opacity="0.5">
+                <line x1="110" y1="4" x2="110" y2="12"/>
+                <line x1="110" y1="208" x2="110" y2="216"/>
+                <line x1="4" y1="110" x2="12" y2="110"/>
+                <line x1="208" y1="110" x2="216" y2="110"/>
+                <line x1="37" y1="27" x2="43" y2="33"/>
+                <line x1="183" y1="27" x2="177" y2="33"/>
+                <line x1="37" y1="193" x2="43" y2="187"/>
+                <line x1="183" y1="193" x2="177" y2="187"/>
+              </g>
+              <circle cx="110" cy="110" r="96" fill="url(#tFace)"/>
+              <circle cx="110" cy="110" r="96" fill="none" stroke="rgba(187,247,208,0.2)" stroke-width="1.5"/>
+              <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(5,46,22,0.5)" stroke-width="1"/>
+
+              <!-- Solana ◎ symbol on tails -->
+              <g filter="url(#tShadow)" transform="translate(110,110)">
+                <!-- Outer ring -->
+                <circle r="36" fill="none" stroke="#d0ffe8" stroke-width="7" stroke-opacity="0.9"/>
+                <!-- Middle ring -->
+                <circle r="22" fill="none" stroke="#d0ffe8" stroke-width="4.5" stroke-opacity="0.7"/>
+                <!-- Center dot -->
+                <circle r="9" fill="#d0ffe8" fill-opacity="0.9"/>
+                <!-- Cardinal dashes -->
+                <line x1="-44" y1="0" x2="-28" y2="0" stroke="#d0ffe8" stroke-width="4" stroke-opacity="0.65" stroke-linecap="round"/>
+                <line x1="28"  y1="0" x2="44"  y2="0" stroke="#d0ffe8" stroke-width="4" stroke-opacity="0.65" stroke-linecap="round"/>
+                <line x1="0" y1="-44" x2="0" y2="-28" stroke="#d0ffe8" stroke-width="4" stroke-opacity="0.65" stroke-linecap="round"/>
+                <line x1="0" y1="28"  x2="0" y2="44"  stroke="#d0ffe8" stroke-width="4" stroke-opacity="0.65" stroke-linecap="round"/>
+              </g>
+
+              <ellipse cx="84" cy="78" rx="34" ry="22" fill="url(#tSheen)" transform="rotate(-30 84 78)"/>
+
+              <path id="ttA" d="M110,110 m-78,0 a78,78 0 0,1 156,0" fill="none"/>
+              <text font-family="Georgia,serif" font-size="10" font-weight="bold" letter-spacing="4" fill="#d0ffe8" fill-opacity="0.6">
+                <textPath href="#ttA" startOffset="14%">SOLANA NETWORK</textPath>
+              </text>
+              <path id="tbA" d="M110,110 m-68,0 a68,68 0 0,0 136,0" fill="none"/>
+              <text font-family="Georgia,serif" font-size="9" letter-spacing="7" fill="#d0ffe8" fill-opacity="0.5">
+                <textPath href="#tbA" startOffset="23%">T A I L S</textPath>
+              </text>
+
+              <circle cx="110" cy="110" r="108" fill="none" stroke="url(#rimT)" stroke-width="1.5" stroke-opacity="0.6"/>
+            </svg>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="coin-shadow-el" id="coinShadow"></div>
+
+      <!-- Result -->
+      <div class="result-box">
+        <div class="result-main" id="reMain"></div>
+        <div class="result-sub"  id="reSub"></div>
+      </div>
+
+      <!-- TX links -->
+      <div class="tx-links" id="txLinks">
+        <a class="tx-link" id="txBet" href="#" target="_blank">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Bet transaction
+        </a>
+        <a class="tx-link" id="txPay" href="#" target="_blank" style="display:none">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Payout transaction
+        </a>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-panel">
+      <div class="section-head">
+        <div class="section-title">Flip History</div>
+        <button class="clear-btn" onclick="clearAll()">Clear</button>
+      </div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Wallet</th>
+            <th>Bet</th>
+            <th>Pick → Result</th>
+            <th>Outcome</th>
+            <th style="text-align:right">P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="histBody">
+          <tr><td colspan="6"><div class="hist-empty">— No flips yet —</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT: BET PANEL ═══ -->
+  <div class="bet-panel">
+
+    <!-- Stats (desktop) -->
+    <div class="quick-stats">
+      <div class="qs-card">
+        <div class="qs-val qs-val-flips">0</div>
+        <div class="qs-lbl">Total Flips</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-wr" style="color:var(--t2)">—</div>
+        <div class="qs-lbl">Win Rate</div>
+      </div>
+      <div class="qs-card">
+        <div class="qs-val qs-val-pnl" style="color:var(--t2)">±0.000</div>
+        <div class="qs-lbl">P&amp;L (SOL)</div>
+      </div>
+    </div>
+
+    <!-- Balance -->
+    <div class="glass-card">
+      <div class="card-label">Balance</div>
+      <div class="bal-big" id="balNum">—<span class="bal-unit">SOL</span></div>
+      <div class="bal-hint" id="balHint">Connect your wallet to start playing</div>
+    </div>
+
+    <!-- Bet amount -->
+    <div class="glass-card">
+      <div class="card-label">Bet Amount</div>
+      <div class="bet-field">
+        <input type="number" id="betInput" value="0.01" min="0.001" max="0.5" step="0.005">
+        <span class="bet-cur">SOL</span>
+      </div>
+      <div class="quick-row">
+        <button class="quick-chip" onclick="setBet(0.01)">0.01</button>
+        <button class="quick-chip" onclick="setBet(0.05)">0.05</button>
+        <button class="quick-chip" onclick="setBet(0.1)">0.10</button>
+        <button class="quick-chip" onclick="setBet(0.25)">0.25</button>
+      </div>
+      <div class="adj-row">
+        <button class="adj-btn" onclick="adjBet(0.5)">½×</button>
+        <button class="adj-btn" onclick="adjBet(2)">2×</button>
+        <button class="adj-btn" onclick="maxBet()">MAX</button>
+      </div>
+    </div>
+
+    <!-- Side -->
+    <div class="glass-card">
+      <div class="card-label">Choose Side</div>
+      <div class="side-grid">
+        <div class="side-card heads-card chosen" id="headsCard" onclick="pickSide('heads')">
+          <svg class="side-mini" viewBox="0 0 220 220">
+            <defs>
+              <radialGradient id="shm" cx="40%" cy="30%" r="70%">
+                <stop offset="0%"   stop-color="#f5dc90"/>
+                <stop offset="50%"  stop-color="#c9a030"/>
+                <stop offset="100%" stop-color="#7a5c12"/>
+              </radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="108" fill="url(#shm)"/>
+            <circle cx="110" cy="110" r="92" fill="#d4a832"/>
+            <ellipse cx="82" cy="76" rx="30" ry="18" fill="white" fill-opacity="0.18" transform="rotate(-28 82 76)"/>
+            <g transform="translate(110,110)">
+              <rect x="-24" y="-22" width="48" height="8" rx="2" fill="#fef0c0" fill-opacity="0.95" transform="skewX(-12)"/>
+              <rect x="-24" y="-7"  width="48" height="8" rx="2" fill="#fef0c0" fill-opacity="0.88" transform="skewX(-12)"/>
+              <rect x="-24" y="8"   width="48" height="8" rx="2" fill="#fef0c0" fill-opacity="0.95" transform="skewX(-12)"/>
+            </g>
+          </svg>
+          <span class="side-name">HEADS</span>
+          <div class="side-check">✓</div>
+        </div>
+        <div class="side-card tails-card" id="tailsCard" onclick="pickSide('tails')">
+          <svg class="side-mini" viewBox="0 0 220 220">
+            <defs>
+              <radialGradient id="stm" cx="40%" cy="30%" r="70%">
+                <stop offset="0%"   stop-color="#d0ffe8"/>
+                <stop offset="50%"  stop-color="#22c55e"/>
+                <stop offset="100%" stop-color="#052e16"/>
+              </radialGradient>
+            </defs>
+            <circle cx="110" cy="110" r="108" fill="url(#stm)"/>
+            <circle cx="110" cy="110" r="92" fill="#1a9e4a"/>
+            <ellipse cx="82" cy="76" rx="30" ry="18" fill="white" fill-opacity="0.12" transform="rotate(-28 82 76)"/>
+            <g transform="translate(110,110)">
+              <circle r="32" fill="none" stroke="#d0ffe8" stroke-width="6" stroke-opacity="0.9"/>
+              <circle r="20" fill="none" stroke="#d0ffe8" stroke-width="4" stroke-opacity="0.7"/>
+              <circle r="8"  fill="#d0ffe8" fill-opacity="0.9"/>
+            </g>
+          </svg>
+          <span class="side-name">TAILS</span>
+          <div class="side-check">✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payout preview -->
+    <div class="payout-row">
+      <span class="pr-label">Win Payout (1.92×)</span>
+      <span class="pr-val" id="payoutPreview">0.0192 SOL</span>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps-wrap" id="stepsWrap">
+      <div class="step-row" id="st1"><div class="step-dot"></div><span id="st1t">Awaiting wallet approval…</span></div>
+      <div class="step-row" id="st2"><div class="step-dot"></div><span id="st2t">Confirming on Solana…</span></div>
+      <div class="step-row" id="st3"><div class="step-dot"></div><span id="st3t">Server resolving flip…</span></div>
+      <div class="step-row" id="st4"><div class="step-dot"></div><span id="st4t">Payout processing…</span></div>
+    </div>
+
+    <!-- FLIP button -->
+    <button id="flipBtn" disabled onclick="doFlip()">Connect Wallet to Play</button>
+
+  </div>
+
+</div><!-- /page -->
+
+<!-- ═══ FULL-WIDTH MY FLIP HISTORY ═══ -->
+<div class="my-history-section" id="myHistorySection">
+  <div class="my-history-panel">
+    <!-- When NOT connected -->
+    <div class="my-history-connect" id="myHistConnect">
+      <div class="mhc-icon">🔗</div>
+      <div class="mhc-text">Connect your wallet to see your flip history</div>
+      <button class="mhc-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+    <!-- When connected -->
+    <div id="myHistContent" style="display:none">
+      <div class="section-head">
+        <div class="section-title">My Flip History</div>
+        <button class="clear-btn" onclick="clearAll()">Clear</button>
+      </div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Bet</th>
+            <th>Pick → Result</th>
+            <th>Outcome</th>
+            <th style="text-align:right">P&amp;L</th>
+          </tr>
+        </thead>
+        <tbody id="myHistBody">
+          <tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script src="https://bundle.run/buffer@6.0.3"></script>
+<script>
+  window.Buffer = window.Buffer || buffer.Buffer;
+</script>
+<script>
+// Load Solana Web3.js
+(function(){
+  var s = document.createElement('script');
+  s.src = '/web3.js';
+  s.onerror = function(){
+    var f = document.createElement('script');
+    f.src = 'https://unpkg.com/@solana/web3.js@1.95.4/lib/index.iife.min.js';
+    document.head.appendChild(f);
+  };
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+const SERVER = '';
+const RPC_LIST = [
+  'https://api.testnet.solana.com',
+  'https://testnet.solana.com',
+  'https://rpc.testnet.solana.com',
+];
+let rpcIndex = 0;
+let conn = null;
+
+function C() {
+  if (!conn && window.solanaWeb3)
+    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
+  return conn;
+}
+
+function nextRPC() {
+  rpcIndex = (rpcIndex + 1) % RPC_LIST.length;
+  console.log('Switching RPC to:', RPC_LIST[rpcIndex]);
+  if (window.solanaWeb3)
+    conn = new solanaWeb3.Connection(RPC_LIST[rpcIndex], 'confirmed');
+  return conn;
+}
+
+/* ── State ── */
+let wallet = null, wBal = 0;
+let side = 'heads', busy = false;
+let treasury = null, network = 'testnet';
+let totalFlips = 0, totalWins = 0, pnl = 0;
+let hist = [];
+
+/* ── Fake wallet addresses for ticker ── */
+const FAKE_ADDRS = [
+  '7xKp…3mRz','BqF2…9wLt','Dk8N…4vPq','Hm3J…7cXs','Ry6W…2nBf',
+  'Uw9E…5aKd','Zp4T…8gMv','Cv1L…6hYn','Fg7Q…0jRt','Jn5A…1eSw',
+  'Lx2G…4bUo','Qs8D…3iCk','Tm6B…9fHl','Vo0Z…7dNp','Xk3M…2yJr',
+];
+function randomAddr() { return FAKE_ADDRS[Math.floor(Math.random()*FAKE_ADDRS.length)]; }
+function randomBet() { return [0.01,0.02,0.05,0.1,0.15,0.25][Math.floor(Math.random()*6)]; }
+
+function seedTicker() {
+  const seeds = [];
+  for (let i = 0; i < 8; i++) {
+    const bet = randomBet();
+    const won = Math.random() > 0.5;
+    const side = Math.random() > 0.5 ? 'heads' : 'tails';
+    const result = Math.random() > 0.5 ? 'heads' : 'tails';
+    const delta = won ? bet * 0.92 : -bet;
+    seeds.push({ addr: randomAddr(), bet, side, result, won, delta });
+  }
+  // Render seeded ticker
+  const track = document.getElementById('tickerTrack');
+  const items = seeds.map(f => {
+    const badge = f.result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = f.won ? 'ticker-win' : 'ticker-loss';
+    const valText = f.won ? '+' + f.delta.toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    return `<span class="ticker-item">${badge}<span class="ticker-addr">${f.addr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }).join('');
+  track.innerHTML = items + items;
+  track.style.animationDuration = '25s';
+}
+
+/* ── Boot ── */
+async function boot() {
+  try {
+    const r = await fetch(`${SERVER}/api/status`);
+    const d = await r.json();
+    if (d.ok) {
+      treasury = d.treasuryPubkey;
+      network  = d.network;
+      document.getElementById('netLabel').textContent = d.network === 'mainnet-beta' ? 'MAINNET' : d.network.toUpperCase();
+    }
+  } catch(e) {}
+}
+boot();
+seedTicker();
+setInterval(boot, 20000);
+
+/* ── Wallet ── */
+/* ── Wallet modal + multi-wallet connection ── */
+let walletProvider = null; // stores the connected provider reference
+const SITE_URL = 'https://solflip.live';
+
+function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+function getPhantomProvider() { return window?.phantom?.solana || window?.solana; }
+function getSolflareProvider() { return window?.solflare; }
+
+function connectWallet() {
+  if (wallet) { disco(); return; }
+  // Update badges
+  const phProv = getPhantomProvider();
+  const sfProv = getSolflareProvider();
+  const mob = isMobile();
+  document.getElementById('wmPhBadge').textContent = phProv?.isPhantom ? 'Detected' : (mob ? 'Open App' : 'Not Found');
+  document.getElementById('wmPhBadge').className = 'wm-badge ' + (phProv?.isPhantom ? 'detected' : (mob ? 'openapp' : ''));
+  document.getElementById('wmSfBadge').textContent = sfProv?.isSolflare ? 'Detected' : (mob ? 'Open App' : 'Not Found');
+  document.getElementById('wmSfBadge').className = 'wm-badge ' + (sfProv?.isSolflare ? 'detected' : (mob ? 'openapp' : ''));
+  document.getElementById('wmOverlay').classList.add('open');
+}
+function closeWM() { document.getElementById('wmOverlay').classList.remove('open'); }
+
+async function selectWallet(type) {
+  const mob = isMobile();
+  if (type === 'phantom') {
+    const prov = getPhantomProvider();
+    if (prov?.isPhantom) {
+      await doConnect(prov);
+    } else if (mob) {
+      window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+    } else {
+      toast('Install Phantom at phantom.app', 'err');
+    }
+  } else if (type === 'solflare') {
+    const prov = getSolflareProvider();
+    if (prov?.isSolflare) {
+      await doConnect(prov);
+    } else if (mob) {
+      window.location.href = `https://solflare.com/ul/v1/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+    } else {
+      toast('Install Solflare at solflare.com', 'err');
+    }
+  }
+}
+
+async function doConnect(provider) {
+  try {
+    const res = await provider.connect();
+    wallet = res.publicKey.toString();
+    walletProvider = provider;
+    await refreshBal();
+    document.getElementById('walletInfo').style.display = 'flex';
+    document.getElementById('wiAddr').textContent = wallet.slice(0,4)+'…'+wallet.slice(-4);
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Disconnect';
+    btn.classList.add('on');
+    document.getElementById('flipBtn').disabled = false;
+    document.getElementById('flipBtn').textContent = 'FLIP';
+    document.getElementById('balHint').textContent = (network === 'mainnet-beta' ? 'Mainnet' : network) + ' balance';
+    closeWM();
+    updateMyHistVisibility();
+    toast('Wallet connected', 'ok');
+  } catch(e) { toast('Connection cancelled', 'err'); }
+}
+
+function disco() {
+  walletProvider?.disconnect?.();
+  wallet = null; wBal = 0; walletProvider = null;
+  document.getElementById('walletInfo').style.display = 'none';
+  document.getElementById('connectBtn').textContent = 'Connect Wallet';
+  document.getElementById('connectBtn').classList.remove('on');
+  document.getElementById('flipBtn').disabled = true;
+  document.getElementById('flipBtn').textContent = 'Connect Wallet to Play';
+  document.getElementById('balNum').innerHTML = '—<span class="bal-unit">SOL</span>';
+  document.getElementById('balHint').textContent = 'Connect your wallet to start playing';
+  updateMyHistVisibility();
+}
+
+async function refreshBal() {
+  if (!wallet) return;
+  try {
+    const c = C(); if (!c) return;
+    const l = await c.getBalance(new solanaWeb3.PublicKey(wallet));
+    wBal = l / solanaWeb3.LAMPORTS_PER_SOL;
+    document.getElementById('balNum').innerHTML = wBal.toFixed(4) + '<span class="bal-unit">SOL</span>';
+    document.getElementById('wiBal').textContent = wBal.toFixed(3);
+  } catch(e) {}
+}
+
+// Auto-connect if already inside Phantom/Solflare in-app browser
+(async function autoConnect() {
+  const prov = getPhantomProvider() || getSolflareProvider();
+  if (prov && (prov.isPhantom || prov.isSolflare) && prov.isConnected) {
+    try { await doConnect(prov); } catch(e) {}
+  }
+})();
+
+/* ── Bet controls ── */
+function setBet(v) { document.getElementById('betInput').value = v; updatePayout(); }
+function adjBet(m) {
+  const v = parseFloat(document.getElementById('betInput').value) || 0;
+  setBet(Math.min(0.5, Math.max(0.001, v * m)).toFixed(4));
+}
+function maxBet() { setBet(Math.min(wBal - 0.001, 0.5).toFixed(4)); }
+document.getElementById('betInput').addEventListener('input', updatePayout);
+function updatePayout() {
+  const v = parseFloat(document.getElementById('betInput').value) || 0;
+  document.getElementById('payoutPreview').textContent = (v * 1.92).toFixed(4) + ' SOL';
+}
+
+/* ── Side ── */
+function pickSide(s) {
+  side = s;
+  document.getElementById('headsCard').classList.toggle('chosen', s === 'heads');
+  document.getElementById('tailsCard').classList.toggle('chosen', s === 'tails');
+}
+
+/* ── Steps ── */
+function step(n, state, txt) {
+  const el = document.getElementById('st'+n);
+  el.className = 'step-row ' + (state||'');
+  if (txt) document.getElementById('st'+n+'t').textContent = txt;
+}
+function clearSteps() {
+  document.getElementById('stepsWrap').classList.remove('visible');
+  [1,2,3,4].forEach(n => step(n, ''));
+}
+
+/* ── Main Flip ── */
+async function doFlip() {
+  if (busy || !wallet) return;
+  if (!treasury) { toast('Server offline. Run npm start', 'err'); return; }
+  const c = C();
+  if (!c) { toast('Web3 loading, try again', 'err'); return; }
+
+  const bet = parseFloat(document.getElementById('betInput').value);
+  if (!bet || bet < 0.001) { toast('Minimum bet is 0.001 SOL', 'err'); return; }
+  if (bet > 0.5)            { toast('Maximum bet is 0.5 SOL', 'err'); return; }
+  await refreshBal();
+  if (bet > wBal - 0.001)  { toast('Insufficient balance', 'err'); return; }
+
+  busy = true;
+  document.getElementById('flipBtn').disabled = true;
+  document.getElementById('flipBtn').textContent = 'Flipping…';
+
+  // Reset result UI
+  const rm = document.getElementById('reMain');
+  const rs = document.getElementById('reSub');
+  rm.className = 'result-main'; rs.className = 'result-sub';
+  document.getElementById('txLinks').className = 'tx-links';
+  document.getElementById('txPay').style.display = 'none';
+  document.getElementById('coinInner').className = 'coin-inner';
+
+  document.getElementById('stepsWrap').classList.add('visible');
+
+  // ─ Step 1: Build & sign tx ─
+  step(1,'active');
+  let sig;
+  try {
+    const ph = walletProvider || getPhantomProvider() || getSolflareProvider();
+    const from  = new solanaWeb3.PublicKey(wallet);
+    const to    = new solanaWeb3.PublicKey(treasury);
+    const lamps = Math.round(bet * solanaWeb3.LAMPORTS_PER_SOL);
+    const { blockhash } = await c.getLatestBlockhash('confirmed');
+    const tx = new solanaWeb3.Transaction({ recentBlockhash: blockhash, feePayer: from })
+      .add(solanaWeb3.SystemProgram.transfer({ fromPubkey: from, toPubkey: to, lamports: lamps }));
+    const { signature } = await ph.signAndSendTransaction(tx);
+    sig = signature;
+    step(1,'done','Transaction sent ✓');
+    document.getElementById('txBet').href = `https://explorer.solana.com/tx/${sig}?cluster=${network}`;
+  } catch(e) {
+    step(1,'fail','Cancelled — ' + (e.message || 'rejected'));
+    toast('Transaction rejected', 'err');
+    done(); return;
+  }
+
+  // ─ Step 2: Confirm on-chain (with retries + RPC failover) ─
+  step(2,'active','Confirming on Solana, please wait…');
+  let confirmed = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const cc = C();
+      const { blockhash, lastValidBlockHeight } = await cc.getLatestBlockhash('confirmed');
+      await Promise.race([
+        cc.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight }, 'confirmed'),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000)),
+      ]);
+      confirmed = true;
+      step(2,'done','Confirmed on Solana ✓');
+      break;
+    } catch(e) {
+      console.log(`Confirm attempt ${attempt + 1} failed:`, e.message);
+      if (attempt < 2) {
+        step(2,'active',`Confirming on Solana (retry ${attempt + 2}/3)…`);
+        nextRPC(); // try a different RPC
+        await sleep(3000);
+      } else {
+        // Even if confirmTransaction fails, the tx may still be valid
+        // The server will verify it with its own polling
+        step(2,'done','Confirmation slow, proceeding…');
+        console.log('All confirm attempts exhausted, proceeding to server call');
+      }
+    }
+  }
+
+  // ─ Step 3: Spin coin & call server (with retry on "not found") ─
+  step(3,'active','Resolving flip on server…');
+  document.getElementById('coinInner').className = 'coin-inner do-flip';
+
+  let res;
+  let serverAttempts = 0;
+  const maxServerAttempts = 2;
+  while (serverAttempts < maxServerAttempts) {
+    try {
+      serverAttempts++;
+      if (serverAttempts > 1) {
+        step(3,'active',`Retrying server verification (attempt ${serverAttempts})…`);
+        await sleep(5000); // wait for tx to propagate on server's node
+      }
+      const r = await fetch(`${SERVER}/api/flip`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ txSignature:sig, playerPubkey:wallet, betAmount:bet, side })
+      });
+      res = await r.json();
+      if (!r.ok || !res.success) {
+        const errMsg = res.error || 'Server error';
+        // If "not found on-chain" and we have retries left, retry
+        if (errMsg.includes('not found') && serverAttempts < maxServerAttempts) {
+          console.log('Server says tx not found, will retry…');
+          continue;
+        }
+        throw new Error(errMsg);
+      }
+      step(3,'done',`Result: ${res.result.toUpperCase()} ✓`);
+      break;
+    } catch(e) {
+      if (serverAttempts >= maxServerAttempts) {
+        step(3,'fail', e.message);
+        toast(e.message, 'err');
+        document.getElementById('coinInner').className = 'coin-inner';
+        done(); return;
+      }
+    }
+  }
+
+  // ─ Step 4: Payout ─
+  if (res.playerWon) {
+    step(4,'active','Sending payout…');
+    await sleep(400);
+    step(4,'done',`+${res.payoutSol.toFixed(4)} SOL sent ✓`);
+    if (res.payoutTxSignature) {
+      const pl = document.getElementById('txPay');
+      pl.href = res.explorerPayoutUrl || '#';
+      pl.style.display = 'flex';
+    }
+  } else {
+    step(4,'done','Better luck next time');
+  }
+
+  // ─ Wait for animation ─
+  await sleep(2000);
+
+  // Set final coin face
+  document.getElementById('coinInner').className = 'coin-inner' + (res.result === 'tails' ? ' show-tails' : '');
+
+  // Result display
+  rm.textContent = res.playerWon ? 'YOU WIN!' : 'YOU LOSE';
+  rm.className   = 'result-main show ' + (res.playerWon ? 'win' : 'lose');
+  rs.textContent = res.playerWon
+    ? `+${res.payoutSol.toFixed(4)} SOL  ·  1.92×`
+    : `-${bet.toFixed(4)} SOL  ·  ${side} vs ${res.result}`;
+  rs.className = 'result-sub show ' + (res.playerWon ? 'win' : 'lose');
+  document.getElementById('txLinks').className = 'tx-links show';
+
+  // Flashes & effects
+  if (res.playerWon) {
+    document.getElementById('winFlash').className = 'win-flash fire';
+    setTimeout(() => document.getElementById('winFlash').className='win-flash', 1200);
+    spawnParticles();
+    toast(`🏆  +${res.payoutSol.toFixed(4)} SOL`, 'ok');
+  } else {
+    document.getElementById('loseFlash').className = 'lose-flash fire';
+    setTimeout(() => document.getElementById('loseFlash').className='lose-flash', 500);
+    toast(`Flip lost · -${bet.toFixed(4)} SOL`);
+  }
+
+  // Stats
+  totalFlips++;
+  if (res.playerWon) totalWins++;
+  const delta = res.playerWon ? res.payoutSol - bet : -bet;
+  pnl += delta;
+  updateStats();
+  addHist({ bet, side, result: res.result, won: res.playerWon, delta });
+  await refreshBal();
+  done();
+}
+
+function done() {
+  busy = false;
+  document.getElementById('flipBtn').disabled = false;
+  document.getElementById('flipBtn').textContent = 'FLIP';
+}
+
+/* ── Stats ── */
+function updateStats() {
+  // Update all stat elements (both mobile and desktop copies)
+  document.querySelectorAll('.qs-val-flips').forEach(el => el.textContent = totalFlips);
+  document.querySelectorAll('.qs-val-wr').forEach(el => {
+    el.textContent = totalFlips > 0 ? Math.round(totalWins/totalFlips*100)+'%' : '—';
+    el.style.color = totalFlips > 0 ? (totalWins/totalFlips > 0.5 ? 'var(--e4)' : 'var(--g3)') : 'var(--t2)';
+  });
+  document.querySelectorAll('.qs-val-pnl').forEach(el => {
+    el.textContent = (pnl >= 0 ? '+' : '') + pnl.toFixed(3);
+    el.style.color = pnl > 0 ? 'var(--e4)' : pnl < 0 ? 'var(--r2)' : 'var(--t2)';
+  });
+}
+
+/* ── History ── */
+function addHist(f) {
+  hist.unshift({ n: ++hist.length, ...f }); // keep index
+  renderHist();
+  updateTicker(f);
+}
+function renderHist() {
+  // Legacy left-column history (mobile)
+  const b = document.getElementById('histBody');
+  if (!hist.length) {
+    b.innerHTML = '<tr><td colspan="6"><div class="hist-empty">— No flips yet —</div></td></tr>';
+  } else {
+    b.innerHTML = hist.slice(0,15).map((f,i) => `
+      <tr>
+        <td class="hist-addr">${totalFlips - i}</td>
+        <td class="hist-addr">${wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '—'}</td>
+        <td>${parseFloat(f.bet).toFixed(3)}</td>
+        <td>${f.side} → <b>${f.result}</b></td>
+        <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
+        <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)}</td>
+      </tr>`).join('');
+  }
+
+  // Full-width my-history table (desktop)
+  const mb = document.getElementById('myHistBody');
+  if (!mb) return;
+  if (!hist.length) {
+    mb.innerHTML = '<tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr>';
+  } else {
+    mb.innerHTML = hist.slice(0,20).map(f => `
+      <tr>
+        <td>${parseFloat(f.bet).toFixed(3)} SOL</td>
+        <td>${f.side} → <b>${f.result}</b></td>
+        <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
+        <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)} SOL</td>
+      </tr>`).join('');
+  }
+}
+
+/* ── My History visibility ── */
+function updateMyHistVisibility() {
+  const section = document.getElementById('myHistorySection');
+  const connectMsg = document.getElementById('myHistConnect');
+  const content = document.getElementById('myHistContent');
+  if (!section) return;
+  if (wallet) {
+    connectMsg.style.display = 'none';
+    content.style.display = 'block';
+  } else {
+    connectMsg.style.display = 'block';
+    content.style.display = 'none';
+  }
+}
+
+/* ── Live Ticker ── */
+let tickerFlips = [];
+function updateTicker(flip) {
+  tickerFlips.unshift(flip);
+  if (tickerFlips.length > 20) tickerFlips.pop();
+  renderTicker();
+}
+function renderTicker() {
+  const track = document.getElementById('tickerTrack');
+  if (!tickerFlips.length) return;
+  const myAddr = wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '???';
+  // Real player flips use real wallet, plus mix in some fake background flips
+  const realItems = tickerFlips.map(f => {
+    const badge = f.result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = f.won ? 'ticker-win' : 'ticker-loss';
+    const valText = f.won ? '+' + f.delta.toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    return `<span class="ticker-item">${badge}<span class="ticker-addr">${myAddr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }).join('');
+  // Add some fake background flips
+  let fakeItems = '';
+  for (let i = 0; i < 6; i++) {
+    const bet = randomBet();
+    const won = Math.random() > 0.5;
+    const result = Math.random() > 0.5 ? 'heads' : 'tails';
+    const delta = won ? bet * 0.92 : -bet;
+    const badge = result === 'heads'
+      ? '<span class="ticker-badge tb-h">H</span>'
+      : '<span class="ticker-badge tb-t">T</span>';
+    const valClass = won ? 'ticker-win' : 'ticker-loss';
+    const valText = won ? '+' + delta.toFixed(3) + ' SOL' : delta.toFixed(3) + ' SOL';
+    fakeItems += `<span class="ticker-item">${badge}<span class="ticker-addr">${randomAddr()}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }
+  const combined = realItems + fakeItems;
+  track.innerHTML = combined + combined; // duplicate for seamless loop
+  const dur = Math.max(20, (tickerFlips.length + 6) * 3);
+  track.style.animationDuration = dur + 's';
+}
+
+function clearAll() {
+  hist=[]; totalFlips=0; totalWins=0; pnl=0;
+  tickerFlips=[];
+  renderHist(); updateStats();
+  clearSteps();
+  document.getElementById('reMain').className='result-main';
+  document.getElementById('reSub').className='result-sub';
+  document.getElementById('txLinks').className='tx-links';
+  document.getElementById('coinInner').className='coin-inner';
+  // Reset ticker
+  document.getElementById('tickerTrack').innerHTML = '<span class="ticker-item"><span class="ticker-addr" style="opacity:0.4">Waiting for flips…</span></span>';
+}
+
+/* ── Particles ── */
+function spawnParticles() {
+  const canvas = document.getElementById('particleCanvas');
+  const stage  = canvas.parentElement;
+  canvas.width  = stage.clientWidth;
+  canvas.height = stage.clientHeight;
+  const ctx = canvas.getContext('2d');
+  const cx  = canvas.width / 2;
+  const cy  = canvas.height * 0.45;
+  const particles = [];
+  const colors = ['#f5dc90','#e8c060','#c9a030','#ffffff','#4ade80','#fef0c0'];
+  for (let i = 0; i < 60; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 5;
+    particles.push({
+      x:cx, y:cy,
+      vx: Math.cos(angle)*speed,
+      vy: Math.sin(angle)*speed - 3,
+      r: 1.5 + Math.random()*3,
+      c: colors[Math.floor(Math.random()*colors.length)],
+      life: 1, decay: 0.018+Math.random()*0.015,
+      rot: Math.random()*Math.PI*2,
+      rotV: (Math.random()-0.5)*0.3,
+      sq: Math.random() > 0.5,
+    });
+  }
+  let af;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if (p.life <= 0) return;
+      alive = true;
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15;
+      p.vx *= 0.98; p.life -= p.decay; p.rot += p.rotV;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.c;
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      if (p.sq) ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+      else { ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); }
+      ctx.restore();
+    });
+    if (alive) af = requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+  setTimeout(() => { cancelAnimationFrame(af); ctx.clearRect(0,0,canvas.width,canvas.height); }, 3000);
+}
+
+/* ── Toast ── */
+let tTO;
+function toast(msg, type='') {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.className = 'toast up ' + type;
+  clearTimeout(tTO);
+  tTO = setTimeout(() => el.classList.remove('up'), 3500);
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// Auto-refresh balance
+setInterval(() => { if (wallet) refreshBal(); }, 30000);
+</script>
+</body>
+</html>
