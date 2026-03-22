@@ -1,7 +1,0 @@
-{
-  "mainnetRpc": "https://mainnet.helius-rpc.com/?api-key=6a5bdbed-9b6e-4304-9ffc-a0aa4eb850fd",
-  "testnetRpc": "https://testnet.helius-rpc.com/?api-key=07f2f232-ae49-4bab-9e54-da0aa847fd5d",
-  "devnetRpc": "",
-  "apiKey": "6a5bdbed-9b6e-4304-9ffc-a0aa4eb850fd",
-  "providerName": "Helius"
-}
