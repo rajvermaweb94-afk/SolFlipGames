@@ -49,6 +49,7 @@ const WALLETS_FILE  = path.join(DATA_DIR, "wallets.json");
 const PLAYERS_FILE  = path.join(DATA_DIR, "players.json");
 const RPC_CONFIG_FILE = path.join(DATA_DIR, "rpc-config.json");
 const SESSIONS      = new Map(); // token → expiry
+const isProd         = process.env.NODE_ENV === 'production';
 
 // ── Ensure data dir ───────────────────────────────────────
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -94,31 +95,44 @@ let wallets   = loadJSON(WALLETS_FILE, []);
 let players   = loadJSON(PLAYERS_FILE, {});
 let rpcConfig = { ...DEFAULT_RPC_CONFIG, ...loadJSON(RPC_CONFIG_FILE, {}) };
 
+// In production, override RPC config from env vars
+if (isProd) {
+  if (process.env.MAINNET_RPC_URL) rpcConfig.mainnetRpc = process.env.MAINNET_RPC_URL;
+  if (process.env.TESTNET_RPC_URL) rpcConfig.testnetRpc = process.env.TESTNET_RPC_URL;
+  if (process.env.RPC_API_KEY)     rpcConfig.apiKey     = process.env.RPC_API_KEY;
+  if (process.env.RPC_PROVIDER)    rpcConfig.providerName = process.env.RPC_PROVIDER;
+  console.log("📡 RPC config loaded from environment variables");
+}
+
 // Save settings immediately so file exists
 saveJSON(SETTINGS_FILE, settings);
 
-// ── Load treasury (env var OR file) ───────────────────────
+// ── Load treasury (production=env var, local=file) ────────
 let primaryKeypair;
 
-if (process.env.TREASURY_PRIVATE_KEY) {
-  // Support both JSON array format [1,2,3...] and base58
+if (isProd) {
+  // Railway / production: MUST use env var
+  if (!process.env.TREASURY_PRIVATE_KEY) {
+    console.error("\n❌  TREASURY_PRIVATE_KEY env var is required in production!\n");
+    process.exit(1);
+  }
   try {
     const raw = process.env.TREASURY_PRIVATE_KEY.trim();
     let secretKey;
     if (raw.startsWith("[")) {
       secretKey = Uint8Array.from(JSON.parse(raw));
     } else {
-      // base58 — use bs58
       const bs58 = require("bs58");
       secretKey = bs58.decode(raw);
     }
     primaryKeypair = Keypair.fromSecretKey(secretKey);
-    console.log("🔑 Treasury loaded from TREASURY_PRIVATE_KEY env var");
+    console.log("🔑 Treasury loaded from TREASURY_PRIVATE_KEY env var (production)");
   } catch(e) {
     console.error("❌ Failed to parse TREASURY_PRIVATE_KEY:", e.message);
     process.exit(1);
   }
 } else {
+  // Local / development: read from treasury.json file
   const TREASURY_FILE = path.join(__dirname, "treasury.json");
   if (!fs.existsSync(TREASURY_FILE)) {
     console.error("\n❌  treasury.json not found! Run: node setup-treasury.js\n");
@@ -126,7 +140,7 @@ if (process.env.TREASURY_PRIVATE_KEY) {
   }
   const treasuryRaw = JSON.parse(fs.readFileSync(TREASURY_FILE, "utf8"));
   primaryKeypair = Keypair.fromSecretKey(Uint8Array.from(treasuryRaw.secretKey));
-  console.log("🔑 Treasury loaded from treasury.json");
+  console.log("🔑 Treasury loaded from treasury.json (local)");
 }
 
 // Add primary treasury to wallets list if not already there

@@ -770,28 +770,257 @@ header {
 }
 
 /* ════════════════════════════════
-   RESPONSIVE
+   MOBILE — PREMIUM APP LAYOUT
+   Screens below 900px
 ════════════════════════════════ */
 @media (max-width: 900px) {
-  .page { grid-template-columns: 1fr; align-items: start; }
-  .left { order:2; gap: 18px; }
-  .left .quick-stats { display: grid; }
-  .left .history-panel { display: block; }
-  .bet-panel { order:1; }
-  .coin-stage { padding: 28px 16px; min-height: 360px; flex: unset; }
-  .live-ticker { display: none; }
-  .my-history-section { display: none; }
-  /* Hide desktop-only stats in right column on mobile */
-  .bet-panel .quick-stats { display: none; }
+  /* ─── Page grid → single column ─── */
+  .page {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    gap: 14px;
+    align-items: start;
+  }
+
+  /* ─── Section order ─── */
+  /* Ticker is already above .page in the DOM — stays at top */
+  .left  { order: 1; gap: 14px; display: flex; flex-direction: column; }
+  .left .quick-stats { order: 1; }
+  .left .coin-stage { order: 2; }
+  .left .history-panel { order: 3; }
+  .bet-panel { order: 2; gap: 12px; }
+
+  /* ─── Header tweaks ─── */
+  header { height: 52px; padding: 0 14px; }
+  .logo { font-size: 0.8rem; gap: 7px; }
+  .logo-gem { width: 22px; height: 22px; }
+  .net-badge { display: none; }
+  .hdr-right { gap: 6px; }
+  .wallet-info { padding: 4px 8px; border-radius: 6px; }
+  .wi-addr { font-size: 0.6rem; }
+  .wi-bal  { font-size: 0.6rem; }
+  #connectBtn { font-size: 0.56rem; padding: 8px 14px; border-radius: 7px; }
+
+  /* ─── Section 1: LIVE TICKER ─── */
+  .live-ticker {
+    display: flex !important;
+    height: 44px;
+    background: rgba(6,8,16,0.92);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .live-indicator { padding: 0 10px; font-size: 0.5rem; }
+  .ticker-item { font-size: 0.6rem; gap: 6px; }
+  .ticker-badge { width: 20px; height: 20px; font-size: 0.45rem; }
+  .ticker-track { gap: 18px; padding-left: 65px; }
+
+  /* ─── Section 2: COIN STAGE ─── */
+  .coin-stage {
+    padding: 20px 14px;
+    min-height: unset;
+    flex: unset;
+    border-radius: 16px;
+    gap: 14px;
+  }
+  .coin-wrap {
+    width: 240px;
+    height: 240px;
+  }
+  .coin-glow {
+    width: 220px; height: 220px;
+  }
+  .coin-shadow-el {
+    width: 140px; margin-top: -14px;
+  }
+  .result-box { min-height: 56px; gap: 4px; }
+  .result-main { font-size: 1.5rem; }
+  .result-sub { font-size: 0.72rem; }
+  .tx-links { gap: 3px; }
+  .tx-link { font-size: 0.55rem; padding: 2px 6px; }
+
+  /* ─── Section 3: STATS ROW ─── */
+  .left .quick-stats { display: grid !important; }
+  .quick-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .qs-card {
+    padding: 10px 8px;
+    border-radius: 8px;
+  }
+  .qs-val {
+    font-size: 0.95rem;
+  }
+  .qs-lbl {
+    font-size: 0.46rem;
+    margin-top: 3px;
+  }
+  /* Hide right-panel stats on mobile */
+  .bet-panel .quick-stats { display: none !important; }
+
+  /* ─── Section 4: GAME CONTROLS ─── */
+  .glass-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .card-label {
+    font-size: 0.52rem;
+    margin-bottom: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Balance card */
+  .bal-big {
+    font-size: 1.6rem;
+  }
+  .bal-unit { font-size: 0.85rem; }
+  .bal-hint { font-size: 0.6rem; margin-top: 4px; }
+
+  /* Bet input */
+  .bet-field input {
+    padding: 12px 50px 12px 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+  .bet-cur { font-size: 0.6rem; right: 12px; }
+  .quick-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+  .quick-chip {
+    padding: 10px 4px;
+    min-height: 44px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .adj-row { gap: 5px; }
+  .adj-btn {
+    padding: 10px;
+    min-height: 44px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Side selector — large touch-friendly cards */
+  .side-grid { gap: 8px; }
+  .side-card {
+    min-height: 80px;
+    padding: 14px 8px;
+    border-radius: 10px;
+    justify-content: center;
+  }
+  .side-mini { width: 42px; height: 42px; }
+  .side-name { font-size: 0.58rem; }
+  .side-check { width: 14px; height: 14px; }
+
+  /* Payout row */
+  .payout-row {
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 0.65rem;
+  }
+
+  /* Steps (transaction indicators) */
+  .step-row {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 0.6rem;
+  }
+
+  /* FLIP BUTTON — premium game button */
+  #flipBtn {
+    padding: 16px;
+    min-height: 56px;
+    font-size: 0.78rem;
+    border-radius: 10px;
+    letter-spacing: 0.15em;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.2) inset,
+      0 -1px 0 rgba(0,0,0,0.3) inset,
+      0 8px 32px rgba(201,160,48,0.35);
+  }
+
+  /* ─── Section 5: MY FLIP HISTORY ─── */
+  .my-history-section {
+    display: block !important;
+    padding: 0 14px 20px;
+  }
+  .my-history-panel {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .my-history-panel .section-title { font-size: 0.55rem; }
+  .my-history-panel .hist-table th { font-size: 0.48rem; padding: 0 6px 6px; }
+  .my-history-panel .hist-table td { font-size: 0.62rem; padding: 7px 6px; }
+  /* Hide # and Wallet columns on mobile */
+  .my-history-panel .hist-table th:nth-child(1),
+  .my-history-panel .hist-table td:nth-child(1) { display: none; }
+  .my-history-panel .hist-table th:nth-child(2),
+  .my-history-panel .hist-table td:nth-child(2) { display: none; }
+  .my-history-connect { padding: 28px 14px; font-size: 0.65rem; }
+
+  /* Left-column history panel */
+  .history-panel { display: none; }
+
+  /* ─── Toast on mobile ─── */
+  .toast {
+    font-size: 0.65rem;
+    padding: 9px 18px;
+    border-radius: 8px;
+    bottom: 16px;
+  }
+
+  /* ─── Atmospheric ─── */
+  .atmo-glow1 { width: 400px; height: 300px; top: -100px; }
+  .atmo-glow2 { width: 250px; height: 200px; }
 }
+
+/* ─── Extra small (< 520px) ─── */
 @media (max-width: 520px) {
-  header { padding: 0 14px; }
-  .logo { font-size: 0.78rem; }
-  .net-badge { display:none; }
-  .quick-row { grid-template-columns: repeat(2,1fr); }
-  .quick-stats { grid-template-columns: repeat(3,1fr); gap:6px; }
-  .qs-val { font-size: 1.1rem; }
-  .hist-table th:nth-child(2), .hist-table td:nth-child(2) { display:none; }
+  header { padding: 0 10px; height: 48px; }
+  .logo { font-size: 0.72rem; gap: 6px; }
+  .logo-gem { width: 20px; height: 20px; }
+  .wallet-info { display: none; }
+  #connectBtn { font-size: 0.52rem; padding: 7px 12px; }
+  .hdr-right { gap: 5px; }
+
+  .page { padding: 10px; gap: 10px; }
+
+  .live-ticker { height: 40px; }
+  .ticker-item { font-size: 0.55rem; }
+  .ticker-badge { width: 18px; height: 18px; font-size: 0.42rem; }
+
+  .coin-stage { min-height: 280px; padding: 16px 10px 14px; border-radius: 14px; }
+  .coin-wrap { width: 155px; height: 155px; }
+  .coin-glow { width: 190px; height: 190px; }
+  .result-main { font-size: 1.3rem; }
+  .result-sub { font-size: 0.66rem; }
+
+  .quick-stats { gap: 5px; }
+  .qs-card { padding: 8px 6px; border-radius: 7px; }
+  .qs-val { font-size: 0.85rem; }
+  .qs-lbl { font-size: 0.42rem; }
+
+  .glass-card { padding: 12px; border-radius: 10px; }
+  .card-label { font-size: 0.48rem; margin-bottom: 8px; }
+  .bal-big { font-size: 1.4rem; }
+
+  .quick-row { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .quick-chip { font-size: 0.6rem; min-height: 40px; }
+  .adj-btn { font-size: 0.6rem; min-height: 40px; }
+
+  .side-card { min-height: 72px; }
+  .side-mini { width: 36px; height: 36px; }
+  .side-name { font-size: 0.52rem; }
+
+  #flipBtn { min-height: 52px; font-size: 0.72rem; }
+
+  .my-history-section { padding: 0 10px 16px; }
+  .my-history-panel { padding: 12px; }
+  .my-history-panel .hist-table td { font-size: 0.58rem; padding: 6px 5px; }
+  .my-history-panel .hist-table th { font-size: 0.44rem; }
 }
 </style>
 </head>
