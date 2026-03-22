@@ -1022,6 +1022,79 @@ header {
   .my-history-panel .hist-table td { font-size: 0.58rem; padding: 6px 5px; }
   .my-history-panel .hist-table th { font-size: 0.44rem; }
 }
+
+/* ════════════════════════════════
+   WALLET SELECT MODAL
+════════════════════════════════ */
+.wm-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.wm-overlay.open { display: flex; }
+.wm-box {
+  background: var(--panel);
+  border: 1px solid var(--line2);
+  border-radius: 20px; padding: 28px;
+  width: 100%; max-width: 380px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.wm-close {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; color: var(--t3);
+  font-size: 1.2rem; cursor: pointer; padding: 4px 8px;
+  border-radius: 6px; transition: all 0.15s;
+}
+.wm-close:hover { color: var(--t1); background: rgba(255,255,255,0.05); }
+.wm-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--t2); margin-bottom: 20px; text-align: center;
+}
+.wm-opts { display: flex; flex-direction: column; gap: 10px; }
+.wm-opt {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px; border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.015);
+  cursor: pointer; transition: all 0.2s;
+  min-height: 60px;
+}
+.wm-opt:hover {
+  border-color: var(--line2);
+  background: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+}
+.wm-opt:active { transform: translateY(0); }
+.wm-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.wm-icon.phantom-ic { background: linear-gradient(135deg, #7b3fe4, #ab9ff2); }
+.wm-icon.solflare-ic { background: linear-gradient(135deg, #e87a1c, #fcc06a); }
+.wm-icon svg { width: 24px; height: 24px; }
+.wm-info { flex: 1; min-width: 0; }
+.wm-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem; font-weight: 600; color: var(--t1);
+}
+.wm-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; color: var(--t3); margin-top: 2px;
+}
+.wm-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; font-weight: 600;
+  padding: 3px 8px; border-radius: 6px;
+  letter-spacing: 0.06em; flex-shrink: 0;
+}
+.wm-badge.detected { background: rgba(34,197,94,0.12); color: var(--e4); }
+.wm-badge.openapp { background: rgba(201,160,48,0.12); color: var(--g3); }
 </style>
 </head>
 <body>
@@ -1053,6 +1126,36 @@ header {
     <button id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
   </div>
 </header>
+
+<!-- ═══ WALLET SELECT MODAL ═══ -->
+<div class="wm-overlay" id="wmOverlay" onclick="if(event.target===this)closeWM()">
+  <div class="wm-box">
+    <button class="wm-close" onclick="closeWM()">✕</button>
+    <div class="wm-title">Connect Wallet</div>
+    <div class="wm-opts">
+      <div class="wm-opt" onclick="selectWallet('phantom')">
+        <div class="wm-icon phantom-ic">
+          <svg viewBox="0 0 128 128" fill="none"><path d="M108.7 66.3C107 61.2 102.7 57 97 56c-2.2-.4-4.5-.3-6.7.2-3 .7-5.7 2.3-7.8 4.5-2.5 2.7-4 6-4.3 9.6-.1 1.4 0 2.8.3 4.2.5 2.2 1.5 4.2 3 5.9 2.4 2.7 5.7 4.3 9.2 4.5 4.7.2 9.2-1.9 12-5.4 2.5-3.1 3.6-7.1 3-10.8-.3-1.5-.8-3-1.5-4.4zM64 16C35.3 16 12 39.3 12 68s23.3 52 52 52 52-23.3 52-52S92.7 16 64 16zm34.5 58.1c-1 5.2-4 9.8-8.2 13-4.3 3.3-9.7 5-15.1 4.6-5-.4-9.6-2.6-13.1-6.2-2.5-2.6-4.3-5.7-5.2-9.1-.7-2.6-.9-5.4-.6-8.1.5-5.2 2.7-10.1 6.3-13.8 3.2-3.3 7.3-5.5 11.8-6.4 3.3-.6 6.6-.5 9.8.5 5 1.5 9.2 4.8 12 9.2 3 4.7 4.3 10.4 3.3 16.3z" fill="white"/></svg>
+        </div>
+        <div class="wm-info">
+          <div class="wm-name">Phantom</div>
+          <div class="wm-sub">Popular Solana wallet</div>
+        </div>
+        <span class="wm-badge" id="wmPhBadge">—</span>
+      </div>
+      <div class="wm-opt" onclick="selectWallet('solflare')">
+        <div class="wm-icon solflare-ic">
+          <svg viewBox="0 0 128 128" fill="none"><circle cx="64" cy="64" r="36" stroke="white" stroke-width="6" fill="none"/><path d="M64 20V8M64 120v-12M20 64H8M120 64h-12M34 34L25 25M103 103l-9-9M34 94l-9 9M103 25l-9 9" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="wm-info">
+          <div class="wm-name">Solflare</div>
+          <div class="wm-sub">Solana DeFi wallet</div>
+        </div>
+        <span class="wm-badge" id="wmSfBadge">—</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ LIVE TICKER ═══ -->
 <div class="live-ticker" id="liveTicker">
@@ -1546,18 +1649,59 @@ seedTicker();
 setInterval(boot, 20000);
 
 /* ── Wallet ── */
-async function connectWallet() {
+/* ── Wallet modal + multi-wallet connection ── */
+let walletProvider = null; // stores the connected provider reference
+const SITE_URL = 'https://solflip.live';
+
+function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+function getPhantomProvider() { return window?.phantom?.solana || window?.solana; }
+function getSolflareProvider() { return window?.solflare; }
+
+function connectWallet() {
   if (wallet) { disco(); return; }
-  const ph = window?.phantom?.solana || window?.solana;
-  if (!ph?.isPhantom) {
-    toast('Phantom wallet not found. Install at phantom.app', 'err');
-    return;
+  // Update badges
+  const phProv = getPhantomProvider();
+  const sfProv = getSolflareProvider();
+  const mob = isMobile();
+  document.getElementById('wmPhBadge').textContent = phProv?.isPhantom ? 'Detected' : (mob ? 'Open App' : 'Not Found');
+  document.getElementById('wmPhBadge').className = 'wm-badge ' + (phProv?.isPhantom ? 'detected' : (mob ? 'openapp' : ''));
+  document.getElementById('wmSfBadge').textContent = sfProv?.isSolflare ? 'Detected' : (mob ? 'Open App' : 'Not Found');
+  document.getElementById('wmSfBadge').className = 'wm-badge ' + (sfProv?.isSolflare ? 'detected' : (mob ? 'openapp' : ''));
+  document.getElementById('wmOverlay').classList.add('open');
+}
+function closeWM() { document.getElementById('wmOverlay').classList.remove('open'); }
+
+async function selectWallet(type) {
+  const mob = isMobile();
+  if (type === 'phantom') {
+    const prov = getPhantomProvider();
+    if (prov?.isPhantom) {
+      await doConnect(prov);
+    } else if (mob) {
+      window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+    } else {
+      toast('Install Phantom at phantom.app', 'err');
+    }
+  } else if (type === 'solflare') {
+    const prov = getSolflareProvider();
+    if (prov?.isSolflare) {
+      await doConnect(prov);
+    } else if (mob) {
+      window.location.href = `https://solflare.com/ul/v1/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+    } else {
+      toast('Install Solflare at solflare.com', 'err');
+    }
   }
+}
+
+async function doConnect(provider) {
   try {
-    const res = await ph.connect();
+    const res = await provider.connect();
     wallet = res.publicKey.toString();
+    walletProvider = provider;
     await refreshBal();
-    // Update UI
     document.getElementById('walletInfo').style.display = 'flex';
     document.getElementById('wiAddr').textContent = wallet.slice(0,4)+'…'+wallet.slice(-4);
     const btn = document.getElementById('connectBtn');
@@ -1566,14 +1710,15 @@ async function connectWallet() {
     document.getElementById('flipBtn').disabled = false;
     document.getElementById('flipBtn').textContent = 'FLIP';
     document.getElementById('balHint').textContent = network + ' balance';
+    closeWM();
     updateMyHistVisibility();
     toast('Wallet connected', 'ok');
   } catch(e) { toast('Connection cancelled', 'err'); }
 }
 
 function disco() {
-  (window?.phantom?.solana || window?.solana)?.disconnect?.();
-  wallet = null; wBal = 0;
+  walletProvider?.disconnect?.();
+  wallet = null; wBal = 0; walletProvider = null;
   document.getElementById('walletInfo').style.display = 'none';
   document.getElementById('connectBtn').textContent = 'Connect Wallet';
   document.getElementById('connectBtn').classList.remove('on');
@@ -1594,6 +1739,14 @@ async function refreshBal() {
     document.getElementById('wiBal').textContent = wBal.toFixed(3);
   } catch(e) {}
 }
+
+// Auto-connect if already inside Phantom/Solflare in-app browser
+(async function autoConnect() {
+  const prov = getPhantomProvider() || getSolflareProvider();
+  if (prov && (prov.isPhantom || prov.isSolflare) && prov.isConnected) {
+    try { await doConnect(prov); } catch(e) {}
+  }
+})();
 
 /* ── Bet controls ── */
 function setBet(v) { document.getElementById('betInput').value = v; updatePayout(); }
@@ -1657,7 +1810,7 @@ async function doFlip() {
   step(1,'active');
   let sig;
   try {
-    const ph = window?.phantom?.solana || window?.solana;
+    const ph = walletProvider || getPhantomProvider() || getSolflareProvider();
     const from  = new solanaWeb3.PublicKey(wallet);
     const to    = new solanaWeb3.PublicKey(treasury);
     const lamps = Math.round(bet * solanaWeb3.LAMPORTS_PER_SOL);
