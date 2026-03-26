@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>SOLFLIP — Heads or Tails on Solana</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;700;900&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -53,6 +54,9 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   cursor: default;
+  /* Telegram safe area + prevent pull-to-refresh */
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  overscroll-behavior-y: contain;
 }
 
 /* ════════════════════════════════
@@ -1252,6 +1256,90 @@ header {
 }
 .wm-badge.detected { background: rgba(34,197,94,0.12); color: var(--e4); }
 .wm-badge.openapp { background: rgba(201,160,48,0.12); color: var(--g3); }
+
+/* ─ Telegram user pill ─ */
+.tg-user-pill {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--panel2);
+  border: 1px solid var(--line2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--t2);
+}
+.tg-user-pill.show { display: flex; }
+.tg-user-pill svg { flex-shrink: 0; }
+
+/* ─ TG deep-link modal ─ */
+.tg-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+.tg-modal-overlay.show { display: flex; }
+.tg-modal-box {
+  background: var(--panel); border: 1px solid var(--line2);
+  border-radius: 20px; padding: 28px 24px;
+  width: min(340px, 90vw); position: relative;
+  text-align: center;
+}
+.tg-modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; color: var(--t3);
+  font-size: 1.1rem; cursor: pointer; line-height: 1;
+}
+.tg-modal-icon { font-size: 2.4rem; margin-bottom: 10px; }
+.tg-modal-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.85rem; font-weight: 700;
+  color: var(--t1); margin-bottom: 6px;
+}
+.tg-modal-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; color: var(--t3);
+  margin-bottom: 20px; line-height: 1.6;
+}
+.tg-modal-btn {
+  width: 100%; padding: 13px 16px;
+  border-radius: 12px; border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  gap: 9px; margin-bottom: 10px;
+  transition: filter 0.2s;
+}
+.tg-modal-btn:hover { filter: brightness(1.1); }
+.tg-modal-btn.phantom {
+  background: linear-gradient(135deg, #7b3fe4, #ab9ff2);
+  color: #fff;
+}
+.tg-modal-btn.solflare {
+  background: linear-gradient(135deg, #e87a1c, #fcc06a);
+  color: #060400;
+}
+
+/* ─ Share button after flip ─ */
+.tg-share-btn {
+  display: none;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #229ED9;
+  color: #fff;
+  border: none; border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem; font-weight: 600;
+  cursor: pointer;
+  align-items: center; justify-content: center;
+  gap: 6px;
+  transition: filter 0.2s;
+}
+.tg-share-btn:hover { filter: brightness(1.1); }
+.tg-share-btn.show { display: flex; }
 </style>
 </head>
 <body>
@@ -1270,7 +1358,12 @@ header {
 <header>
   <a class="logo" href="#">SOLFLIP</a>
   <div class="hdr-right">
-    <div class="net-badge"><span class="net-dot"></span><span id="netLabel">TESTNET</span></div>
+    <div class="net-badge" id="netBadge"><span class="net-dot"></span><span id="netLabel">TESTNET</span></div>
+    <!-- Telegram user pill (shown only inside Telegram) -->
+    <div class="tg-user-pill" id="tgUserPill">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8c-.12.56-.44.7-.9.43l-2.5-1.84-1.2 1.16c-.13.13-.25.24-.5.24l.18-2.57 4.6-4.16c.2-.18-.04-.28-.3-.1L7.4 14.69l-2.47-.77c-.54-.17-.55-.54.11-.8l9.66-3.72c.45-.16.84.11.7.8h-.76z"/></svg>
+      <span id="tgUserName"></span>
+    </div>
     <div class="wallet-info" id="walletInfo">
       <span class="wi-addr" id="wiAddr">—</span>
       <span class="wi-sep">·</span>
@@ -1315,6 +1408,24 @@ header {
         <span class="wm-badge" id="wmSfBadge">—</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ TELEGRAM WALLET DEEP-LINK MODAL ═══ -->
+<div class="tg-modal-overlay" id="tgWalletModal">
+  <div class="tg-modal-box">
+    <button class="tg-modal-close" onclick="closeTgWalletModal()">&#x2715;</button>
+    <div class="tg-modal-icon">💜</div>
+    <div class="tg-modal-title">Open in Wallet Browser</div>
+    <div class="tg-modal-note">Open the game in your wallet browser<br>to connect and play.</div>
+    <button class="tg-modal-btn phantom" onclick="openPhantomDeepLink()">
+      <svg width="18" height="18" viewBox="0 0 128 128" fill="none"><path d="M108.7 66.3C107 61.2 102.7 57 97 56c-2.2-.4-4.5-.3-6.7.2-3 .7-5.7 2.3-7.8 4.5-2.5 2.7-4 6-4.3 9.6-.1 1.4 0 2.8.3 4.2.5 2.2 1.5 4.2 3 5.9 2.4 2.7 5.7 4.3 9.2 4.5 4.7.2 9.2-1.9 12-5.4 2.5-3.1 3.6-7.1 3-10.8-.3-1.5-.8-3-1.5-4.4zM64 16C35.3 16 12 39.3 12 68s23.3 52 52 52 52-23.3 52-52S92.7 16 64 16z" fill="white"/></svg>
+      Open in Phantom
+    </button>
+    <button class="tg-modal-btn solflare" onclick="openSolflareDeepLink()">
+      <svg width="18" height="18" viewBox="0 0 128 128" fill="none"><circle cx="64" cy="64" r="36" stroke="#060400" stroke-width="6" fill="none"/><path d="M64 20V8M64 120v-12M20 64H8M120 64h-12M34 34L25 25M103 103l-9-9M34 94l-9 9M103 25l-9 9" stroke="#060400" stroke-width="5" stroke-linecap="round"/></svg>
+      Open in Solflare
+    </button>
   </div>
 </div>
 
@@ -1658,6 +1769,11 @@ header {
       <div class="result-box">
         <div class="result-main" id="reMain"></div>
         <div class="result-sub"  id="reSub"></div>
+        <!-- Telegram share / try-again button (hidden when not in TG) -->
+        <button class="tg-share-btn" id="tgShareBtn" onclick="tgShareAction()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.993 2.993 0 0018 8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81A2.993 2.993 0 006 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.76 0 1.44-.3 1.96-.77l7.13 4.16c-.05.21-.09.43-.09.66 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+          Share Win
+        </button>
       </div>
 
       <!-- TX links -->
@@ -1975,6 +2091,31 @@ header {
 })();
 </script>
 <script>
+// ── Telegram Mini App Init (Update 1) ──
+const isTelegram = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData !== '');
+let tgUser = null;
+if (isTelegram) {
+  const twa = window.Telegram.WebApp;
+  twa.ready();
+  twa.expand();
+  twa.setBackgroundColor('#060810');
+  twa.setHeaderColor('#060810');
+  twa.enableClosingConfirmation();
+  tgUser = twa.initDataUnsafe?.user || null;
+}
+
+// ── Telegram Header Pill (Update 2) ──
+(function initTgHeader() {
+  if (isTelegram && tgUser) {
+    const name = (tgUser.first_name || tgUser.username || 'Player').slice(0, 12);
+    document.getElementById('tgUserName').textContent = name;
+    document.getElementById('tgUserPill').classList.add('show');
+    // Hide net badge to save space
+    const nb = document.getElementById('netBadge');
+    if (nb) nb.style.display = 'none';
+  }
+})();
+
 const SERVER = '';
 let rpcUrl = null;
 let conn = null;
@@ -2028,6 +2169,15 @@ function getSolflareProvider() { return window?.solflare; }
 
 function connectWallet() {
   if (wallet) { disco(); return; }
+  // ── Telegram: no wallet injected on mobile → show deep-link modal ──
+  if (isTelegram && isMobile()) {
+    const phProv = getPhantomProvider();
+    const sfProv = getSolflareProvider();
+    if (!phProv?.isPhantom && !sfProv?.isSolflare) {
+      document.getElementById('tgWalletModal').classList.add('show');
+      return;
+    }
+  }
   // Update badges
   const phProv = getPhantomProvider();
   const sfProv = getSolflareProvider();
@@ -2082,6 +2232,20 @@ async function doConnect(provider) {
     updateMyHistVisibility();
     toast('Wallet connected', 'ok');
     playWalletConnectSound();
+    // TG Back Button (Update 4)
+    if (isTelegram) {
+      window.Telegram.WebApp.BackButton.show();
+      window.Telegram.WebApp.BackButton.onClick(() => {
+        if (busy) {
+          window.Telegram.WebApp.showConfirm('A flip is in progress. Are you sure you want to leave?', (ok) => {
+            if (ok) { disco(); window.Telegram.WebApp.BackButton.hide(); }
+          });
+        } else {
+          disco();
+          window.Telegram.WebApp.BackButton.hide();
+        }
+      });
+    }
   } catch(e) { toast('Connection cancelled', 'err'); }
 }
 
@@ -2097,6 +2261,8 @@ function disco() {
   document.getElementById('balNum').innerHTML = '—<span class="bal-unit">SOL</span>';
   document.getElementById('balHint').textContent = 'Connect your wallet to start playing';
   updateMyHistVisibility();
+  // TG: hide back button on disconnect
+  if (isTelegram) window.Telegram.WebApp.BackButton.hide();
 }
 
 async function refreshBal() {
@@ -2308,11 +2474,26 @@ async function doFlip() {
     spawnParticles();
     playWinSound();
     toast(`🏆  +${res.payoutSol.toFixed(4)} SOL`, 'ok');
+    if (isTelegram) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
   } else {
     document.getElementById('loseFlash').className = 'lose-flash fire';
     setTimeout(() => document.getElementById('loseFlash').className='lose-flash', 500);
     playLoseSound();
     toast(`Flip lost · -${bet.toFixed(4)} SOL`);
+    if (isTelegram) window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+  }
+
+  // TG Share Button (Update 5)
+  lastFlipResult = { won: res.playerWon, payoutSol: res.payoutSol, bet };
+  if (isTelegram) {
+    const sb = document.getElementById('tgShareBtn');
+    sb.textContent = '';
+    if (res.playerWon) {
+      sb.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.993 2.993 0 0018 8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81A2.993 2.993 0 006 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.76 0 1.44-.3 1.96-.77l7.13 4.16c-.05.21-.09.43-.09.66 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> Share Win';
+    } else {
+      sb.textContent = '🔄 Try Again';
+    }
+    sb.classList.add('show');
   }
 
   // Stats
@@ -2331,6 +2512,34 @@ function done() {
   document.getElementById('flipBtn').disabled = false;
   document.getElementById('flipBtn').textContent = 'FLIP';
   document.getElementById('flipBtn').classList.remove('connect-state');
+}
+
+/* ── Telegram helpers (Updates 3 & 5) ── */
+let lastFlipResult = null;
+function closeTgWalletModal() {
+  document.getElementById('tgWalletModal').classList.remove('show');
+}
+function openPhantomDeepLink() {
+  closeTgWalletModal();
+  window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent('https://solflip.live')}?ref=${encodeURIComponent('https://solflip.live')}`;
+}
+function openSolflareDeepLink() {
+  closeTgWalletModal();
+  window.location.href = `https://solflare.com/ul/v1/browse/${encodeURIComponent('https://solflip.live')}?ref=${encodeURIComponent('https://solflip.live')}`;
+}
+function tgShareAction() {
+  if (!lastFlipResult) return;
+  if (lastFlipResult.won) {
+    const txt = encodeURIComponent(`I just won ${lastFlipResult.payoutSol.toFixed(4)} SOL on SolFlip! 🪙 Play Heads or Tails on Solana — try your luck!`);
+    const url = encodeURIComponent('https://t.me/SolFlipBot');
+    window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${url}&text=${txt}`);
+  } else {
+    // Try Again: hide share button and reset UI
+    document.getElementById('tgShareBtn').classList.remove('show');
+    document.getElementById('reMain').textContent = '';
+    document.getElementById('reSub').textContent = '';
+    document.getElementById('txLinks').className = 'tx-links';
+  }
 }
 
 /* ── Stats ── */

@@ -365,6 +365,28 @@ select.fi option{background:#10122a;}
 .on-list.sh{display:block;}
 .on-list .oli{font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--t2);padding:4px 6px;border-radius:4px;}
 .on-list .oli:hover{background:rgba(255,255,255,0.03);}
+/* ─ Win Rate Slider ─ */
+.wr-slider-row{display:flex;align-items:center;gap:16px;margin:12px 0;}
+.wr-slider{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.06);border-radius:4px;outline:none;cursor:pointer;}
+.wr-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--e2),var(--e4));cursor:pointer;box-shadow:0 0 8px rgba(74,222,128,0.4);}
+.wr-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--e2),var(--e4));cursor:pointer;border:none;box-shadow:0 0 8px rgba(74,222,128,0.4);}
+.wr-display{font-family:'Unbounded',sans-serif;font-size:1.1rem;font-weight:700;color:var(--e4);white-space:nowrap;min-width:130px;text-align:right;}
+.wr-stats{display:flex;gap:12px;margin:10px 0;}
+.wr-stat{flex:1;padding:10px 14px;border-radius:9px;text-align:center;}
+.wr-stat.user{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.18);}
+.wr-stat.house{background:rgba(201,160,48,0.07);border:1px solid rgba(201,160,48,0.18);}
+.wr-stat .wrl{font-family:'JetBrains Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;color:var(--t3);}
+.wr-stat.user .wrl{color:var(--e4);}
+.wr-stat.house .wrl{color:var(--g3);}
+.wr-stat .wrv{font-family:'Unbounded',sans-serif;font-size:1.2rem;font-weight:700;}
+.wr-bar-wrap{height:28px;border-radius:8px;overflow:hidden;display:flex;margin:10px 0;}
+.wr-bar-user{background:linear-gradient(90deg,#15803d,#4ade80);display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:0.55rem;color:#fff;font-weight:700;transition:width 0.4s ease;min-width:30px;}
+.wr-bar-house{background:linear-gradient(90deg,#b8860b,#f5dc90);display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:0.55rem;color:#060400;font-weight:700;transition:width 0.4s ease;min-width:30px;}
+.wr-warn{display:none;padding:8px 13px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:0.65rem;margin-top:8px;align-items:center;gap:7px;}
+.wr-warn.sh{display:flex;}
+.wr-warn.amber{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:var(--a4);}
+.wr-warn.red{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:var(--r3);}
+
 </style>
 </head>
 <body>
@@ -541,6 +563,39 @@ select.fi option{background:#10122a;}
           <div class="hb"><div class="hl">Paid Out Today</div><div class="hv red" id="hs-p">0</div></div>
           <div class="hb"><div class="hl">Net Profit Today</div><div class="hv grn" id="hs-n">0</div></div>
         </div>
+
+        <!-- USER WIN RATE CONTROL -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch">
+            <h3>User Win Rate Control</h3>
+            <span class="bx bgo" id="wr-badge">50% FAIR</span>
+          </div>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--t3);line-height:1.7;margin-bottom:4px">Control the percentage of flips users can win in real time.</p>
+          <div class="wr-slider-row">
+            <input type="range" class="wr-slider" id="wrSlider" min="10" max="100" step="5" value="50" oninput="updateWinRateUI(this.value)">
+            <div class="wr-display"><span id="wrVal">50</span>% USER WIN RATE</div>
+          </div>
+          <div class="wr-stats">
+            <div class="wr-stat user">
+              <div class="wrl">🍀 User Wins</div>
+              <div class="wrv" id="wrUserPct" style="color:var(--e4)">50%</div>
+            </div>
+            <div class="wr-stat house">
+              <div class="wrl">🏀 House Wins</div>
+              <div class="wrv" id="wrHousePct" style="color:var(--g3)">50%</div>
+            </div>
+          </div>
+          <div class="wr-bar-wrap">
+            <div class="wr-bar-user" id="wrBarUser" style="width:50%">50%</div>
+            <div class="wr-bar-house" id="wrBarHouse" style="width:50%">50%</div>
+          </div>
+          <div class="wr-warn amber" id="wrWarnLow">⚠️ Low user win rate — may affect player retention</div>
+          <div class="wr-warn red" id="wrWarnHigh">🚫 House always loses — not recommended</div>
+          <div style="margin-top:12px">
+            <button class="btn btn-go" onclick="saveWinRate()">Save Rate</button>
+          </div>
+        </div>
+
         <div class="tc">
           <div class="card">
             <div class="ch"><h3>Flip Mode</h3><span class="bx bgo" id="cm">random</span></div>
@@ -717,10 +772,47 @@ function nav(id){
   if(id==='players') lPlayers();
   if(id==='wallets') lWallets();
   if(id==='cfg') lCfg();
-  if(id==='ctrl'){lCtrl();ctrlLogTimer=setInterval(lCtrlLog,5000);}
+  if(id==='ctrl'){lCtrl();lWinRate();ctrlLogTimer=setInterval(lCtrlLog,5000);}
 }
 function loadAll(){loadStats();}
 function refreshAll(){loadStats();const c=document.querySelector('.sbi.on');if(c)c.click();}
+
+/* ── Win Rate Control ── */
+async function lWinRate(){
+  try{
+    const r=await fetch(`${API}/api/admin/get-win-rate`,{headers:ah()});
+    const d=await r.json();
+    if(d.ok){document.getElementById('wrSlider').value=d.userWinRate;updateWinRateUI(d.userWinRate);}
+  }catch(e){}
+}
+function updateWinRateUI(v){
+  v=parseInt(v);
+  const h=100-v;
+  document.getElementById('wrVal').textContent=v;
+  document.getElementById('wrUserPct').textContent=v+'%';
+  document.getElementById('wrHousePct').textContent=h+'%';
+  document.getElementById('wrBarUser').style.width=v+'%';
+  document.getElementById('wrBarUser').textContent=v+'%';
+  document.getElementById('wrBarHouse').style.width=h+'%';
+  document.getElementById('wrBarHouse').textContent=h+'%';
+  const badge=document.getElementById('wr-badge');
+  if(v<=30){badge.textContent=v+'% HOUSE FAVORED';badge.className='bx br';}
+  else if(v<50){badge.textContent=v+'% SLIGHT HOUSE EDGE';badge.className='bx ba';}
+  else if(v===50){badge.textContent='50% FAIR';badge.className='bx bgo';}
+  else if(v<70){badge.textContent=v+'% PLAYER FAVORED';badge.className='bx bg';}
+  else{badge.textContent=v+'% VERY GENEROUS';badge.className='bx bg';}
+  document.getElementById('wrWarnLow').classList.toggle('sh',v<40);
+  document.getElementById('wrWarnHigh').classList.toggle('sh',v===100);
+}
+async function saveWinRate(){
+  const v=parseInt(document.getElementById('wrSlider').value);
+  try{
+    const r=await fetch(`${API}/api/admin/set-win-rate`,{method:'POST',headers:ah(),body:JSON.stringify({winRate:v})});
+    const d=await r.json();
+    if(d.ok){toast('Win rate saved — '+v+'% user wins','ok');}
+    else toast(d.error||'Error saving win rate','er');
+  }catch(e){toast('Network error','er');}
+}
 
 /* ── Stats (enhanced) ── */
 async function loadStats(){

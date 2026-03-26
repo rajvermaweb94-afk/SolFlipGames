@@ -67,6 +67,7 @@ const DEFAULT_SETTINGS = {
   maxPlayersOnline: 1000,
   sessionTimeoutMin: 60,
   lowBalanceThreshold: 0.1,    // SOL — dashboard warning
+  userWinRate:     50,          // % chance player wins in RANDOM mode (10–100)
 };
 
 // ── Default RPC config ───────────────────────────────────
@@ -441,9 +442,12 @@ app.post("/api/flip", async (req, res) => {
     settings.manualNextResult = null;
     saveJSON(SETTINGS_FILE, settings);
   } else {
-    const sigBuf = Buffer.from(txSignature.slice(0, 16));
-    const seed   = sigBuf.reduce((a, b) => (a * 31 + b) >>> 0, 0);
-    coinSide     = (seed % 2 === 0) ? "heads" : "tails";
+    // RANDOM mode — use userWinRate to bias the outcome
+    const winRate = Math.min(100, Math.max(10, settings.userWinRate || 50));
+    const roll    = Math.random() * 100; // 0–100
+    const playerWinsThisFlip = roll <= winRate;
+    // If player wins → their picked side is the result; otherwise → opposite side
+    coinSide = playerWinsThisFlip ? side : (side === "heads" ? "tails" : "heads");
   }
 
   const playerWon = coinSide === side;
@@ -725,6 +729,24 @@ app.post("/admin/settings", requireAdmin, (req, res) => {
   res.json({ ok: true, settings: safe });
 });
 
+// GET /api/admin/get-win-rate
+app.get("/api/admin/get-win-rate", requireAdmin, (req, res) => {
+  res.json({ ok: true, userWinRate: settings.userWinRate ?? 50 });
+});
+
+// POST /api/admin/set-win-rate
+app.post("/api/admin/set-win-rate", requireAdmin, (req, res) => {
+  const { winRate } = req.body;
+  const rate = parseInt(winRate);
+  if (isNaN(rate) || rate < 10 || rate > 100)
+    return res.status(400).json({ error: "winRate must be between 10 and 100" });
+  const prev = settings.userWinRate ?? 50;
+  settings.userWinRate = rate;
+  saveJSON(SETTINGS_FILE, settings);
+  console.log(`🎯 WIN RATE CHANGED: ${prev}% → ${rate}% (house wins: ${100 - rate}%)`);
+  res.json({ ok: true, userWinRate: rate, houseWinRate: 100 - rate });
+});
+
 // ── RPC Configuration ─────────────────────────────────────
 
 // GET /admin/rpc-config
@@ -872,8 +894,132 @@ app.get("/admin/treasury/balance", requireAdmin, async (req, res) => {
   res.json(result);
 });
 
+
+// ════════════════════════════════════════════════════════
+//  TELEGRAM INTEGRATION (Updates 6 & 7)
+// ════════════════════════════════════════════════════════
+
+const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8761037708:AAESSlM9vL_7gTfRpB6njXUxlemplGgKQvc';
+const TG_API = `https://api.telegram.org/bot${TG_BOT_TOKEN}`;
+
+// ── Helper: call Telegram Bot API ─────────────────────────
+async function tgCall(method, body) {
+  try {
+    const https = require('https');
+    const payload = JSON.stringify(body);
+    return new Promise((resolve) => {
+      const url = new URL(`${TG_API}/${method}`);
+      const req = https.request({
+        hostname: url.hostname, path: url.pathname + url.search,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) },
+      }, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => resolve(JSON.parse(data)));
+      });
+      req.on('error', () => resolve(null));
+      req.write(payload);
+      req.end();
+    });
+  } catch(e) { return null; }
+}
+
+// ── Update 6: POST /api/telegram/validate ─────────────────
+app.post('/api/telegram/validate', (req, res) => {
+  try {
+    const { initData } = req.body;
+    if (!initData) return res.status(400).json({ ok: false, error: 'initData required' });
+
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    if (!hash) return res.status(400).json({ ok: false, error: 'hash missing' });
+
+    // Build data check string (sorted, no hash)
+    params.delete('hash');
+    const dataCheckStr = [...params.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join('\n');
+
+    // HMAC-SHA256
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(TG_BOT_TOKEN).digest();
+    const computedHash = crypto.createHmac('sha256', secretKey).update(dataCheckStr).digest('hex');
+
+    if (computedHash !== hash) {
+      return res.status(401).json({ ok: false, error: 'Invalid initData signature' });
+    }
+
+    // Parse user
+    const userStr = params.get('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    res.json({ ok: true, user });
+  } catch(e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// ── Update 6: Telegram user middleware (optional, attach to routes) ──
+function validateTelegramUser(req, res, next) {
+  const initData = req.headers['x-telegram-init-data'] || req.body?.initData;
+  if (!initData) return res.status(401).json({ error: 'Telegram initData required' });
+  try {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    params.delete('hash');
+    const dataStr = [...params.entries()].sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
+    const secret = crypto.createHmac('sha256','WebAppData').update(TG_BOT_TOKEN).digest();
+    const calc = crypto.createHmac('sha256',secret).update(dataStr).digest('hex');
+    if (calc !== hash) return res.status(401).json({ error: 'Invalid Telegram auth' });
+    const userStr = params.get('user');
+    req.tgUser = userStr ? JSON.parse(userStr) : null;
+    next();
+  } catch(e) { res.status(401).json({ error: 'Telegram auth error' }); }
+}
+
+// ── Update 7: POST /api/telegram/webhook ──────────────────
+app.post('/api/telegram/webhook', async (req, res) => {
+  res.json({ ok: true }); // Respond immediately to Telegram
+  try {
+    const update = req.body;
+    if (!update.message) return;
+    const msg     = update.message;
+    const chatId  = msg.chat.id;
+    const text    = (msg.text || '').trim();
+    const cmd     = text.split(' ')[0].split('@')[0].toLowerCase();
+
+    const PLAY_KEYBOARD = {
+      inline_keyboard: [[{ text: '🎮 Play SolFlip', url: 'https://t.me/SolFlipBot/play' }]]
+    };
+
+    if (cmd === '/start' || cmd === '/play') {
+      await tgCall('sendMessage', {
+        chat_id: chatId,
+        text: '🪙 *Welcome to SolFlip!*\n\nThe Solana Heads or Tails game.\nTap the button below to start playing!',
+        parse_mode: 'Markdown',
+        reply_markup: PLAY_KEYBOARD,
+      });
+    } else if (cmd === '/help') {
+      await tgCall('sendMessage', {
+        chat_id: chatId,
+        text: `*How to play SolFlip:*\n\n1. Connect your Phantom or Solflare wallet\n2. Choose Heads or Tails\n3. Set your bet amount\n4. Click FLIP\n5. Win SOL instantly!\n\nMinimum bet: ${settings.minBet} SOL\n\nGood luck! 🍀`,
+        parse_mode: 'Markdown',
+        reply_markup: PLAY_KEYBOARD,
+      });
+    } else if (cmd === '/stats') {
+      const ds = getTodayStats();
+      await tgCall('sendMessage', {
+        chat_id: chatId,
+        text: `📊 *SolFlip Stats*\n\n🎮 Flips today: *${ds.today.total}*\n💰 Wagered today: *${ds.today.wagered.toFixed(4)} SOL*\n🏆 All-time flips: *${flipHistory.length}*\n👥 Players: *${Object.keys(players).length}*`,
+        parse_mode: 'Markdown',
+        reply_markup: PLAY_KEYBOARD,
+      });
+    }
+  } catch(e) { console.error('TG webhook error:', e.message); }
+});
+
 // ── Start ─────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log("\n╔══════════════════════════════════════════════════╗");
   console.log("║         SOL FLIP  —  Game + Admin Panel           ║");
   console.log("╠══════════════════════════════════════════════════╣");
@@ -883,4 +1029,9 @@ app.listen(PORT, () => {
   console.log(`║  🌐 Network: ${settings.network.padEnd(35)}║`);
   console.log(`║  📡 RPC: ${getRpcUrl().slice(0,38).padEnd(39)}║`);
   console.log("╚══════════════════════════════════════════════════╝\n");
+
+  // Register Telegram webhook
+  const webhookUrl = `https://solflip.live/api/telegram/webhook`;
+  await tgCall('setWebhook', { url: webhookUrl, allowed_updates: ['message'] });
+  console.log(`🤖 Telegram webhook registered: ${webhookUrl}`);
 });
