@@ -188,6 +188,7 @@ header {
 /* ════════════════════════════════
    PAGE LAYOUT
 ════════════════════════════════ */
+/* Base (mobile-first): 2-column grid */
 .page {
   position: relative; z-index: 1;
   max-width: 1200px; margin: 0 auto;
@@ -197,21 +198,37 @@ header {
   gap: 24px;
   align-items: stretch;
 }
+
+/* ══════ DESKTOP LAYOUT — flex row, fixed side columns, fluid middle ══════ */
 @media (min-width: 901px) {
   .page {
-    grid-template-columns: 320px 1fr 420px;
+    /* Switch to flex so each column controls its OWN size */
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;   /* columns start at top, grow independently */
+    gap: 24px;
     max-width: 1600px;
+    /* No height/overflow constraints here — let each column decide */
+    height: auto;
+    overflow: visible;
   }
 }
 
 /* ════════════════════════════════
-   LEFT COLUMN
+   MIDDLE COLUMN (coin + history)
 ════════════════════════════════ */
 .left { display:flex; flex-direction:column; gap:0; }
 /* Coin stage wrap: strip + stage always connected as one block */
-.coin-stage-wrap { display: flex; flex-direction: column; }
-/* Gap before desktop history panel */
+.coin-stage-wrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* Desktop: middle column takes all remaining width between fixed side columns */
 @media (min-width: 901px) {
+  .left {
+    flex: 1 1 0%;        /* grow to fill remaining width */
+    min-width: 0;        /* allow shrinking without overflow */
+    width: 0;            /* combined with flex:1 ensures proper flexbox sizing */
+    height: auto;        /* natural height — no constraints */
+    overflow: visible;
+  }
   .coin-hist-panel { margin-top: 16px; }
 }
 
@@ -497,6 +514,16 @@ header {
    RIGHT COLUMN — BET PANEL
 ════════════════════════════════ */
 .bet-panel { display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 901px) {
+  /* Right panel: fixed width, natural height, never compressed */
+  .bet-panel {
+    width: 420px;
+    min-width: 420px;
+    flex-shrink: 0;    /* never compress regardless of siblings */
+    height: auto;
+    overflow: visible;
+  }
+}
 
 /* Glass card */
 .glass-card {
@@ -873,18 +900,23 @@ header {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 16px;
-  height: 280px;
+  height: 260px;        /* Fixed height — inner scrolls */
+  min-height: 260px;
+  max-height: 260px;
   display: flex; flex-direction: column;
   position: relative; overflow: hidden;
+  flex-shrink: 0;
 }
 .coin-hist-panel::before {
   content:''; position:absolute; top:0; left:0; right:0; height:1px;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
 }
-.coin-hist-panel .section-head { padding: 14px 16px 0; flex-shrink:0; }
+.coin-hist-panel .section-head { padding: 14px 16px 0; flex-shrink:0; margin-bottom: 0; }
 .coin-hist-panel .hist-scroll-wrap {
-  overflow-y: auto; max-height: 240px; padding: 0 4px 4px;
+  overflow-y: auto;
   flex: 1;
+  min-height: 0;
+  padding: 4px 4px 8px;
 }
 .coin-hist-panel .hist-scroll-wrap::-webkit-scrollbar { width: 4px; }
 .coin-hist-panel .hist-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
@@ -1363,7 +1395,27 @@ header {
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
 }
 @media (min-width: 901px) {
-  .chat-panel { display: flex; }
+  /* ── Chat panel: FIXED width + INDEPENDENT height ──────────────────────
+     Width is explicit so the middle/right columns never get compressed.
+     Height is tied to viewport directly — NOT to parent — so siblings
+     keep their natural size regardless of how many messages load.
+     position:sticky keeps it visible even when middle col is taller.     */
+  .chat-panel {
+    display: flex;
+    width: 320px;
+    min-width: 320px;
+    flex-shrink: 0;
+    height: calc(100vh - 180px);
+    min-height: 480px;
+    max-height: 900px;
+    position: sticky;
+    top: 20px;
+    overflow: hidden;
+  }
+  /* Messages scroll inside; header + input stay fixed */
+  .chat-panel .chat-msgs      { flex: 1; min-height: 0; overflow-y: auto; scroll-behavior: smooth; }
+  .chat-panel .chat-header    { flex-shrink: 0; }
+  .chat-panel .chat-input-area{ flex-shrink: 0; }
 }
 .chat-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -1788,7 +1840,7 @@ header {
 <div class="page">
 
   <!-- ═══ CHAT PANEL (desktop left col) ═══ -->
-  <div class="chat-panel" id="chatPanel" style="min-height:500px">
+  <div class="chat-panel" id="chatPanel">
     <div class="chat-header">
       <div class="chat-header-left">
         <span class="chat-live-dot"></span>
@@ -3133,6 +3185,76 @@ function updateTicker(flip) {
   if (tickerFlips.length > 20) tickerFlips.pop();
   renderTicker();
 }
+
+/* ── Server-side live flip feed (visible to ALL visitors, no login needed) ── */
+let _liveLastId = 0;
+let _liveHtResults = [];
+async function fetchLiveFlips() {
+  try {
+    const r = await fetch('/api/history');
+    if (!r.ok) return;
+    const flips = await r.json();
+    if (!flips || !flips.length) return;
+
+    // Check if there are new flips (by comparing first flip id/timestamp)
+    const newestId = flips[0].id || 0;
+    if (newestId === _liveLastId) return; // nothing new
+    _liveLastId = newestId;
+
+    // Build ticker items from server flips (for all visitors)
+    // Only update if the player hasn't already generated local ticker items
+    if (!tickerFlips.length) {
+      const serverItems = flips.slice(0, 20).map(f => ({
+        won: f.playerWon,
+        delta: f.playerWon ? f.payoutSol - f.betSol : -f.betSol,
+        addr: f.playerPubkey,
+        bet: f.betSol,
+      }));
+      // Build special server ticker (uses addr, not local wallet)
+      renderTickerFromServer(serverItems);
+    }
+
+    // Update H&T strip from server flips if local player hasn't played yet
+    if (!htResults.length) {
+      _liveHtResults = flips.slice(0, 30).map(f => f.result === 'heads' ? 'h' : 't');
+      renderHtStripFromServer(_liveHtResults);
+    }
+  } catch(e) {}
+}
+
+function renderTickerFromServer(items) {
+  const track = document.getElementById('tickerTrack');
+  if (!track || !items.length) return;
+  const html = items.map(f => {
+    const valClass = f.won ? 'ticker-win' : 'ticker-loss';
+    const valText  = f.won ? '+' + Math.abs(f.delta).toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    const addr = f.addr || '???';
+    return `<span class="ticker-item"><span class="ticker-addr">${addr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
+  }).join('');
+  track.innerHTML = html + html;
+  track.style.animation = '';
+  const dur = Math.max(20, items.length * 4);
+  track.style.animationDuration = dur + 's';
+}
+
+function renderHtStripFromServer(results) {
+  const track = document.getElementById('htTrack');
+  if (!track || !results.length) return;
+  const items = results.map((r, i) => {
+    const cls = r === 'h' ? 'htb-h' : 'htb-t';
+    const lbl = r === 'h' ? 'H' : 'T';
+    if (i === 0) {
+      return `<span class="htb-latest-wrap"><span class="ht-last-label">LAST</span><span class="htb ${cls} htb-latest">${lbl}</span></span>`;
+    }
+    return `<span class="htb ${cls}">${lbl}</span>`;
+  }).join('');
+  track.style.animation = '';
+  track.innerHTML = results.length >= 6 ? items + items : items;
+}
+
+// Start polling immediately and every 6s — works for all visitors without login
+fetchLiveFlips();
+setInterval(fetchLiveFlips, 6000);
 function renderTicker() {
   const track = document.getElementById('tickerTrack');
   if (!tickerFlips.length) {
