@@ -62,5 +62,37 @@
     "text": "hi",
     "wallet": null,
     "timestamp": "2026-03-29T03:45:04.604Z"
+  },
+  {
+    "id": 1774760555544.7678,
+    "type": "user",
+    "username": "CryptoAce68",
+    "text": "hi",
+    "wallet": null,
+    "timestamp": "2026-03-29T05:02:35.544Z"
+  },
+  {
+    "id": 1774760565779.935,
+    "type": "user",
+    "username": "CryptoAce68",
+    "text": "best shop",
+    "wallet": null,
+    "timestamp": "2026-03-29T05:02:45.779Z"
+  },
+  {
+    "id": 1774760574731.8252,
+    "type": "user",
+    "username": "CryptoAce68",
+    "text": "this is manish",
+    "wallet": null,
+    "timestamp": "2026-03-29T05:02:54.731Z"
+  },
+  {
+    "id": 1774760618750.5496,
+    "type": "user",
+    "username": "CryptoAce68",
+    "text": "very nice",
+    "wallet": null,
+    "timestamp": "2026-03-29T05:03:38.750Z"
   }
 ]

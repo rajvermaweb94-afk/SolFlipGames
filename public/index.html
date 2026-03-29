@@ -199,8 +199,8 @@ header {
 }
 @media (min-width: 901px) {
   .page {
-    grid-template-columns: 260px 1fr 340px;
-    max-width: 1340px;
+    grid-template-columns: 320px 1fr 420px;
+    max-width: 1600px;
   }
 }
 
@@ -1450,16 +1450,15 @@ header {
   font-size: 0.65rem; color: var(--t3);
   letter-spacing: 0.06em;
 }
-/* Input area */
+/* Input area — name row hidden, username auto-generated */
 .chat-input-area {
   border-top: 1px solid var(--line);
   padding: 10px 12px;
   display: flex; flex-direction: column; gap: 7px;
   flex-shrink: 0;
 }
-.chat-name-row {
-  display: flex; align-items: center; gap: 6px;
-}
+/* Name row hidden — crypto username is auto-generated */
+.chat-name-row { display: none !important; }
 .chat-name-lbl {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.52rem; color: var(--t3);
@@ -1474,28 +1473,29 @@ header {
   transition: border-color 0.15s;
 }
 .chat-name-input:focus { border-color: rgba(201,160,48,0.3); color: var(--t1); }
-.chat-send-row { display: flex; gap: 6px; }
+.chat-send-row { display: flex; gap: 8px; }
 .chat-text-input {
   flex: 1; background: var(--ink3);
   border: 1px solid var(--line);
-  border-radius: 8px; padding: 8px 12px;
+  border-radius: 10px; padding: 12px 14px;
   color: var(--t1); font-family: 'Outfit', sans-serif;
-  font-size: 0.7rem; outline: none;
+  font-size: 0.78rem; outline: none;
   transition: border-color 0.15s;
 }
-.chat-text-input:focus { border-color: rgba(201,160,48,0.3); }
+.chat-text-input:focus { border-color: rgba(34,197,94,0.4); box-shadow: 0 0 0 2px rgba(34,197,94,0.08); }
 .chat-text-input::placeholder { color: var(--t3); }
 .chat-send-btn {
-  background: linear-gradient(135deg, var(--g1), var(--g3));
-  color: #07050a; border: none; border-radius: 8px;
-  padding: 8px 14px;
+  background: linear-gradient(135deg, #0d5c2e 0%, #15803d 50%, #166534 100%);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 12px 22px;
   font-family: 'Unbounded', sans-serif;
-  font-size: 0.55rem; font-weight: 700;
+  font-size: 0.62rem; font-weight: 700;
   letter-spacing: 0.08em; text-transform: uppercase;
   cursor: pointer; transition: all 0.15s;
-  flex-shrink: 0;
+  flex-shrink: 0; min-width: 76px;
+  box-shadow: 0 2px 12px rgba(21,128,61,0.3);
 }
-.chat-send-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.chat-send-btn:hover { filter: brightness(1.12); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(21,128,61,0.45); }
 
 /* ════════════════════════════════
    MOBILE BOTTOM NAV (< 901px)
@@ -1503,7 +1503,7 @@ header {
 .mob-bot-nav {
   display: none;
   position: fixed; bottom: 0; left: 0; right: 0;
-  height: 60px;
+  height: 78px;                /* +30% from 60px */
   background: #0b0d18;
   border-top: 1px solid rgba(255,255,255,0.08);
   z-index: 1000;
@@ -1512,7 +1512,7 @@ header {
 }
 @media (max-width: 900px) {
   .mob-bot-nav { display: flex; }
-  body { padding-bottom: calc(68px + max(0px, env(safe-area-inset-bottom))); }
+  body { padding-bottom: calc(88px + max(0px, env(safe-area-inset-bottom))); }
 }
 .mob-tab {
   flex: 1; display: flex; flex-direction: column;
@@ -1523,10 +1523,10 @@ header {
   padding: 0;
 }
 .mob-tab.active { color: #e8c060; }
-.mob-tab svg { width: 20px; height: 20px; }
+.mob-tab svg { width: 26px; height: 26px; }
 .mob-tab-label {
   font-family: 'Unbounded', sans-serif;
-  font-size: 0.38rem; font-weight: 700;
+  font-size: 0.44rem; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase;
   line-height: 1;
 }
@@ -1546,6 +1546,9 @@ header {
 
 /* Mobile section panels — all hidden by default, shown by JS */
 .mob-section { display: none; }
+/* Mobile-only: hide on desktop, JS shows on mobile */
+#mobChat    { display: none; }
+#mobHistory { display: none; }
 
 /* Fixed flip button on mobile */
 #mobFlipFixed { display: none; }
@@ -1560,13 +1563,13 @@ header {
   #flipBtn                  { display: none !important; }
 
   /* PLAY content padding so fixed button doesn't overlap last item */
-  .page { padding-bottom: 130px; }
+  .page { padding-bottom: 158px; }
 
   /* ── Fixed PLAY/Connect button — always visible on PLAY tab ── */
   #mobFlipFixed {
     display: block;
     position: fixed;
-    bottom: 68px;
+    bottom: 86px;
     left: 0; right: 0;
     margin: 0;
     padding: 0 16px;
@@ -1601,12 +1604,12 @@ header {
     position: fixed;
     top: 64px;
     left: 0; right: 0;
-    bottom: 60px;
-    height: calc(100vh - 124px);
+    bottom: 78px;
+    height: calc(100vh - 142px);
     display: none;
     flex-direction: column;
     overflow: hidden;
-    z-index: 10;
+    z-index: 200;   /* above ticker z-index:99 */
   }
   #mobChat .chat-panel {
     display: flex !important;
@@ -1624,12 +1627,12 @@ header {
     position: fixed;
     top: 64px;
     left: 0; right: 0;
-    bottom: 60px;
-    height: calc(100vh - 124px);
+    bottom: 78px;
+    height: calc(100vh - 142px);
     display: none;
     flex-direction: column;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 200;   /* above ticker z-index:99 */
     padding: 0 14px 12px;
   }
   .mob-hist-inner {
@@ -1797,10 +1800,6 @@ header {
       <div class="chat-empty" id="chatEmpty">Be the first to say something…</div>
     </div>
     <div class="chat-input-area">
-      <div class="chat-name-row">
-        <span class="chat-name-lbl">NAME:</span>
-        <input class="chat-name-input" id="chatNameInput" maxlength="24" placeholder="CryptoWhale, SolKing…">
-      </div>
       <div class="chat-send-row">
         <input class="chat-text-input" id="chatTextInput" maxlength="120" placeholder="Say something…" onkeydown="if(event.key==='Enter')sendChatMsg()">
         <button class="chat-send-btn" onclick="sendChatMsg()">Send</button>
@@ -2426,10 +2425,6 @@ header {
       <div class="chat-empty" id="chatEmptyMob">Be the first to say something…</div>
     </div>
     <div class="chat-input-area">
-      <div class="chat-name-row">
-        <span class="chat-name-lbl">NAME:</span>
-        <input class="chat-name-input" id="chatNameInputMob" maxlength="24" placeholder="CryptoWhale, SolKing…">
-      </div>
       <div class="chat-send-row">
         <input class="chat-text-input" id="chatTextInputMob" maxlength="120" placeholder="Say something…" onkeydown="if(event.key==='Enter')sendChatMsgMob()">
         <button class="chat-send-btn" onclick="sendChatMsgMob()">Send</button>
@@ -3357,17 +3352,16 @@ setInterval(() => { if (wallet) refreshBal(); }, 30000);
    CHAT SYSTEM
 ══════════════════════════════════════ */
 const CHAT_NAMES = ['CryptoWhale','SolKing','FlipMaster','LuckyFlip','DiamondHands',
-  'MoonRider','SolSurfer','CoinLord','FlipGod','GoldRush'];
-let myName = localStorage.getItem('chatName') || CHAT_NAMES[Math.floor(Math.random()*CHAT_NAMES.length)];
-let chatLastIds = new Set();
-
-// Init name inputs
-(function initChatName() {
-  const ni  = document.getElementById('chatNameInput');
-  const nim = document.getElementById('chatNameInputMob');
-  if (ni)  { ni.value  = myName; ni.addEventListener('change',  () => { myName = ni.value.trim()||myName; localStorage.setItem('chatName',myName); if(nim) nim.value=myName; }); }
-  if (nim) { nim.value = myName; nim.addEventListener('change', () => { myName = nim.value.trim()||myName; localStorage.setItem('chatName',myName); if(ni)  ni.value=myName; }); }
-})();
+  'MoonRider','SolSurfer','CoinLord','FlipGod','GoldRush','SolBull','BlockChain',
+  'CoinFlippr','SolWhale','DeFiKing','MoonShot','CryptoAce','SolFlipper','GoldRush'];
+// Auto-generate a random crypto username (persisted per session)
+if (!localStorage.getItem('chatName')) {
+  localStorage.setItem('chatName', CHAT_NAMES[Math.floor(Math.random()*CHAT_NAMES.length)] + Math.floor(Math.random()*99+1));
+}
+let myName = localStorage.getItem('chatName');
+// Separate ID tracking sets per container — fixes mobile chat not showing messages
+let chatDesktopIds = new Set();
+let chatMobIds     = new Set();
 
 const CHAT_COLORS = ['#e8c060','#4ade80','#60a5fa','#f472b6','#a78bfa','#fb923c','#34d399','#f87171'];
 function nameColor(name) {
@@ -3407,14 +3401,14 @@ function buildMsgEl(msg) {
   return div;
 }
 
-function renderChatMsgs(msgs, container, emptyEl) {
+function renderChatMsgs(msgs, container, emptyEl, idSet) {
   if (!container) return;
   if (!msgs || !msgs.length) { if(emptyEl) emptyEl.style.display=''; return; }
   if (emptyEl) emptyEl.style.display = 'none';
   msgs.forEach(msg => {
     const id = String(msg.id);
-    if (!chatLastIds.has(id)) {
-      chatLastIds.add(id);
+    if (!idSet.has(id)) {
+      idSet.add(id);
       container.appendChild(buildMsgEl(msg));
     }
   });
@@ -3425,8 +3419,9 @@ async function fetchChatMsgs() {
   try {
     const r = await fetch('/api/chat/messages');
     const msgs = await r.json();
-    renderChatMsgs(msgs, document.getElementById('chatMsgs'),    document.getElementById('chatEmpty'));
-    renderChatMsgs(msgs, document.getElementById('chatMsgsMob'), document.getElementById('chatEmptyMob'));
+    // Each container has its own ID set — both desktop & mobile get all messages
+    renderChatMsgs(msgs, document.getElementById('chatMsgs'),    document.getElementById('chatEmpty'),    chatDesktopIds);
+    renderChatMsgs(msgs, document.getElementById('chatMsgsMob'), document.getElementById('chatEmptyMob'), chatMobIds);
     const n = Math.max(1, Math.min(msgs.length, 8) + Math.floor(Math.random()*3));
     const oc = document.getElementById('chatOnlineCount');      if(oc)  oc.textContent  = n+' online';
     const ocm= document.getElementById('chatOnlineCountMob');   if(ocm) ocm.textContent = n+' online';
