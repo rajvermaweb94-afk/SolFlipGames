@@ -155,10 +155,10 @@ header {
   background: linear-gradient(135deg, #0d5c2e 0%, #15803d 50%, #166534 100%);
   color: #ffffff;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  padding: 11px 26px;
+  padding: 12px 28px;
   border-radius: 10px;
   border: none;
   cursor: pointer;
@@ -196,6 +196,12 @@ header {
   grid-template-columns: 1fr 360px;
   gap: 24px;
   align-items: stretch;
+}
+@media (min-width: 901px) {
+  .page {
+    grid-template-columns: 260px 1fr 340px;
+    max-width: 1340px;
+  }
 }
 
 /* ════════════════════════════════
@@ -952,7 +958,7 @@ header {
   .wallet-info { padding: 4px 8px; border-radius: 6px; }
   .wi-addr { font-size: 0.6rem; }
   .wi-bal  { font-size: 0.6rem; }
-  #connectBtn { font-size: 0.6rem; padding: 10px 20px; border-radius: 8px; }
+  #connectBtn { font-size: 0.72rem; padding: 11px 22px; border-radius: 10px; }
   #connectBtn svg { width: 16px; height: 16px; }
 
   /* ─── Section 1: LIVE TICKER ─── */
@@ -1340,6 +1346,341 @@ header {
 }
 .tg-share-btn:hover { filter: brightness(1.1); }
 .tg-share-btn.show { display: flex; }
+/* ════════════════════════════════
+   LIVE CHAT PANEL (desktop only)
+════════════════════════════════ */
+.chat-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.chat-panel::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+@media (min-width: 901px) {
+  .chat-panel { display: flex; }
+}
+.chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.chat-header-left { display: flex; align-items: center; gap: 7px; }
+.chat-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--t3);
+}
+.chat-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--e3);
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 6px rgba(34,197,94,0.5);
+}
+.chat-online-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; color: var(--e4);
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.18);
+  border-radius: 10px; padding: 2px 7px;
+}
+.chat-msgs {
+  flex: 1; overflow-y: auto;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 0;
+}
+.chat-msgs::-webkit-scrollbar { width: 3px; }
+.chat-msgs::-webkit-scrollbar-track { background: transparent; }
+.chat-msgs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.chat-msg {
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.chat-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif; font-size: 0.42rem;
+  font-weight: 700; flex-shrink: 0; color: #fff;
+  text-transform: uppercase;
+}
+.chat-msg-body { flex: 1; min-width: 0; }
+.chat-msg-meta {
+  display: flex; align-items: baseline; gap: 5px;
+  margin-bottom: 2px;
+}
+.chat-msg-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.65rem; font-weight: 600;
+}
+.chat-msg-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem; color: var(--t3);
+}
+.chat-msg-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.68rem; color: var(--t1);
+  word-break: break-word; line-height: 1.4;
+}
+/* System messages */
+.chat-msg.sys {
+  border-left: 3px solid var(--line);
+  padding-left: 10px;
+  align-items: center;
+  gap: 0;
+}
+.chat-msg.sys-win  { border-left-color: var(--e3); }
+.chat-msg.sys-loss { border-left-color: var(--r2); }
+.chat-msg.sys .chat-msg-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; color: var(--t2);
+}
+.chat-msg.sys-win  .chat-msg-text { color: var(--e4); }
+.chat-msg.sys-loss .chat-msg-text { color: var(--r3); }
+/* Empty chat */
+.chat-empty {
+  text-align: center; padding: 40px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; color: var(--t3);
+  letter-spacing: 0.06em;
+}
+/* Input area */
+.chat-input-area {
+  border-top: 1px solid var(--line);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 7px;
+  flex-shrink: 0;
+}
+.chat-name-row {
+  display: flex; align-items: center; gap: 6px;
+}
+.chat-name-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; color: var(--t3);
+  white-space: nowrap;
+}
+.chat-name-input {
+  flex: 1; background: var(--ink3);
+  border: 1px solid var(--line);
+  border-radius: 6px; padding: 5px 9px;
+  color: var(--t2); font-family: 'Outfit', sans-serif;
+  font-size: 0.62rem; outline: none;
+  transition: border-color 0.15s;
+}
+.chat-name-input:focus { border-color: rgba(201,160,48,0.3); color: var(--t1); }
+.chat-send-row { display: flex; gap: 6px; }
+.chat-text-input {
+  flex: 1; background: var(--ink3);
+  border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 12px;
+  color: var(--t1); font-family: 'Outfit', sans-serif;
+  font-size: 0.7rem; outline: none;
+  transition: border-color 0.15s;
+}
+.chat-text-input:focus { border-color: rgba(201,160,48,0.3); }
+.chat-text-input::placeholder { color: var(--t3); }
+.chat-send-btn {
+  background: linear-gradient(135deg, var(--g1), var(--g3));
+  color: #07050a; border: none; border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.55rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s;
+  flex-shrink: 0;
+}
+.chat-send-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ════════════════════════════════
+   MOBILE BOTTOM NAV (< 901px)
+════════════════════════════════ */
+.mob-bot-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: #0b0d18;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .mob-bot-nav { display: flex; }
+  body { padding-bottom: calc(68px + max(0px, env(safe-area-inset-bottom))); }
+}
+.mob-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; transition: color 0.15s;
+  color: #4a5070; position: relative;
+  border: none; background: none;
+  padding: 0;
+}
+.mob-tab.active { color: #e8c060; }
+.mob-tab svg { width: 20px; height: 20px; }
+.mob-tab-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 0.38rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  line-height: 1;
+}
+/* Chat notification dot — blinks red, hidden once CHAT tab is opened */
+.mob-chat-dot {
+  position: absolute; top: 4px; right: calc(50% - 16px);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239,68,68,0.8);
+  animation: chatDotBlink 1s steps(1, end) infinite;
+}
+.mob-chat-dot.seen { display: none !important; }
+@keyframes chatDotBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Mobile section panels — all hidden by default, shown by JS */
+.mob-section { display: none; }
+
+/* Fixed flip button on mobile */
+#mobFlipFixed { display: none; }
+
+@media (max-width: 900px) {
+
+  /* ── PLAY section: hide ALL history panels — only mobHistory tab shows them ── */
+  .page .history-panel      { display: none !important; }
+  .page .coin-hist-panel    { display: none !important; }
+  /* The full-width my-history-section is NEVER shown on mobile — history is in #mobHistory tab */
+  .my-history-section       { display: none !important; }
+  #flipBtn                  { display: none !important; }
+
+  /* PLAY content padding so fixed button doesn't overlap last item */
+  .page { padding-bottom: 130px; }
+
+  /* ── Fixed PLAY/Connect button — always visible on PLAY tab ── */
+  #mobFlipFixed {
+    display: block;
+    position: fixed;
+    bottom: 68px;
+    left: 0; right: 0;
+    margin: 0;
+    padding: 0 16px;
+    z-index: 999;
+  }
+  #mobFlipFixed button {
+    width: 100%;
+    padding: 14px 24px;
+    min-height: 52px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.78rem; font-weight: 900;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: #060408;
+    border: none; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(160deg, var(--g0) 0%, var(--g2) 35%, var(--g4) 55%, var(--g3) 80%, var(--g1) 100%);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 -1px 0 rgba(0,0,0,0.3) inset, 0 8px 32px rgba(201,160,48,0.35);
+    transition: all 0.25s;
+  }
+  #mobFlipFixed button.connect-state {
+    background: linear-gradient(135deg, #0d5c2e 0%, #15803d 50%, #166534 100%);
+    color: #fff;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.06em;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 0 12px rgba(125,211,252,0.3);
+    opacity: 1 !important;
+    cursor: pointer;
+  }
+
+  /* ── CHAT section: full-height panel only — no other content ── */
+  #mobChat {
+    position: fixed;
+    top: 64px;
+    left: 0; right: 0;
+    bottom: 60px;
+    height: calc(100vh - 124px);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10;
+  }
+  #mobChat .chat-panel {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 0;
+    border-left: none; border-right: none;
+  }
+  #mobChat .chat-msgs { flex: 1; min-height: 0; }
+  /* Hide desktop chat panel on mobile — only mobChat is used */
+  #chatPanel { display: none !important; }
+
+  /* ── HISTORY section: single panel, no duplicates ── */
+  #mobHistory {
+    position: fixed;
+    top: 64px;
+    left: 0; right: 0;
+    bottom: 60px;
+    height: calc(100vh - 124px);
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 10;
+    padding: 0 14px 12px;
+  }
+  .mob-hist-inner {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .mob-hist-inner .section-head { padding: 14px 16px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+  .mob-hist-inner .hist-table-wrap {
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
+    flex: 1;
+  }
+  .mob-hist-connect-state {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; padding: 40px 20px;
+    flex: 1;
+  }
+  .mob-hist-connect-state .mhc-icon { font-size: 2rem; }
+  .mob-hist-connect-state .mhc-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--t2);
+    text-align: center; line-height: 1.5;
+  }
+  .mob-hist-connect-state .mhc-btn {
+    background: linear-gradient(135deg, #0d5c2e, #15803d);
+    color: #fff; border: none; border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  /* ── Bottom nav: fixed, dark background, proper active states ── */
+  .mob-bot-nav {
+    background: #0b0d18 !important;
+    border-top: 1px solid rgba(255,255,255,0.08) !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important; right: 0 !important;
+    z-index: 1000 !important;
+  }
+  .mob-tab { color: #4a5070; }
+  .mob-tab.active { color: #e8c060; }
+}
 </style>
 </head>
 <body>
@@ -1371,10 +1712,10 @@ header {
       <span class="wi-sep">SOL</span>
     </div>
     <button id="connectBtn" onclick="connectWallet()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="7" width="20" height="14" rx="3" ry="3" fill="white" opacity="0.95"/>
-        <path d="M7 7V5a3 3 0 013-3h4a3 3 0 013 3v2" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-        <circle cx="17" cy="14" r="2" fill="#0d5c2e"/>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 8 21.1 7 20 7Z"/>
+        <path d="M16 7V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7"/>
+        <circle cx="16" cy="14" r="2" fill="white" stroke="none"/>
       </svg>
       Connect
     </button>
@@ -1443,7 +1784,31 @@ header {
 <!-- ═══ PAGE ═══ -->
 <div class="page">
 
-  <!-- ═══ LEFT ═══ -->
+  <!-- ═══ CHAT PANEL (desktop left col) ═══ -->
+  <div class="chat-panel" id="chatPanel" style="min-height:500px">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <span class="chat-live-dot"></span>
+        <span class="chat-title">Live Chat</span>
+      </div>
+      <span class="chat-online-count" id="chatOnlineCount">1 online</span>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="chat-empty" id="chatEmpty">Be the first to say something…</div>
+    </div>
+    <div class="chat-input-area">
+      <div class="chat-name-row">
+        <span class="chat-name-lbl">NAME:</span>
+        <input class="chat-name-input" id="chatNameInput" maxlength="24" placeholder="CryptoWhale, SolKing…">
+      </div>
+      <div class="chat-send-row">
+        <input class="chat-text-input" id="chatTextInput" maxlength="120" placeholder="Say something…" onkeydown="if(event.key==='Enter')sendChatMsg()">
+        <button class="chat-send-btn" onclick="sendChatMsg()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ LEFT (middle on desktop) ═══ -->
   <div class="left">
 
     <!-- Quick stats (visible on mobile only) -->
@@ -2039,6 +2404,82 @@ header {
 
 </div><!-- /page -->
 
+<!-- ═══ MOBILE: Fixed Flip Button ═══ -->
+<div id="mobFlipFixed">
+  <button id="mobFlipBtn" disabled onclick="connectWallet()" class="connect-state">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 8 21.1 7 20 7Z"/><path d="M16 7V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7"/><circle cx="16" cy="14" r="2" fill="white" stroke="none"/></svg>
+    Connect Wallet to Play
+  </button>
+</div>
+
+<!-- ═══ MOBILE: Chat Section ═══ -->
+<div id="mobChat">
+  <div class="chat-panel" id="chatPanelMob">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <span class="chat-live-dot"></span>
+        <span class="chat-title">Live Chat</span>
+      </div>
+      <span class="chat-online-count" id="chatOnlineCountMob">1 online</span>
+    </div>
+    <div class="chat-msgs" id="chatMsgsMob">
+      <div class="chat-empty" id="chatEmptyMob">Be the first to say something…</div>
+    </div>
+    <div class="chat-input-area">
+      <div class="chat-name-row">
+        <span class="chat-name-lbl">NAME:</span>
+        <input class="chat-name-input" id="chatNameInputMob" maxlength="24" placeholder="CryptoWhale, SolKing…">
+      </div>
+      <div class="chat-send-row">
+        <input class="chat-text-input" id="chatTextInputMob" maxlength="120" placeholder="Say something…" onkeydown="if(event.key==='Enter')sendChatMsgMob()">
+        <button class="chat-send-btn" onclick="sendChatMsgMob()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE: History Section ═══ -->
+<div id="mobHistory">
+  <div class="mob-hist-inner">
+    <!-- not connected -->
+    <div id="mobHistConnect" class="mob-hist-connect-state">
+      <div class="mhc-icon">🔗</div>
+      <div class="mhc-text">Connect your wallet to see your flip history</div>
+      <button class="mhc-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+    <!-- connected -->
+    <div id="mobHistContent" style="display:none; flex-direction:column; flex:1;">
+      <div class="section-head">
+        <div class="section-title">MY FLIP HISTORY</div>
+        <button class="clear-btn" onclick="clearAll()">Clear</button>
+      </div>
+      <div class="hist-table-wrap">
+        <table class="hist-table">
+          <thead><tr><th>Bet</th><th>Pick → Result</th><th>Outcome</th><th style="text-align:right">P&amp;L</th></tr></thead>
+          <tbody id="mobHistBody"><tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE BOTTOM NAV ═══ -->
+<nav class="mob-bot-nav" id="mobBotNav">
+  <button class="mob-tab active" id="tabPlay" onclick="switchMobTab('play')">
+    <svg fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+    <span class="mob-tab-label">Play</span>
+  </button>
+  <button class="mob-tab" id="tabChat" onclick="switchMobTab('chat')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <span class="mob-chat-dot" id="mobChatDot"></span>
+    <span class="mob-tab-label">Chat</span>
+  </button>
+  <button class="mob-tab" id="tabHistory" onclick="switchMobTab('history')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span class="mob-tab-label">History</span>
+  </button>
+</nav>
+
 <!-- ═══ FULL-WIDTH MY FLIP HISTORY ═══ -->
 <div class="my-history-section" id="myHistorySection">
   <div class="my-history-panel">
@@ -2232,6 +2673,14 @@ async function doConnect(provider) {
     updateMyHistVisibility();
     toast('Wallet connected', 'ok');
     playWalletConnectSound();
+    if (typeof syncMobFlipBtn === 'function') syncMobFlipBtn();
+    // Post welcome to chat after a short delay so chat system is ready
+    setTimeout(() => {
+      if (typeof postChatMsg === 'function' && wallet) {
+        const addr = wallet.slice(0,4)+'…'+wallet.slice(-4);
+        postChatMsg(`${myName||addr} (${addr}) joined the game 👋`, 'system-connect');
+      }
+    }, 300);
     // TG Back Button (Update 4)
     if (isTelegram) {
       window.Telegram.WebApp.BackButton.show();
@@ -2253,14 +2702,16 @@ function disco() {
   walletProvider?.disconnect?.();
   wallet = null; wBal = 0; walletProvider = null;
   document.getElementById('walletInfo').style.display = 'none';
-  document.getElementById('connectBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="7" width="20" height="14" rx="3" ry="3" fill="white" opacity="0.95"/><path d="M7 7V5a3 3 0 013-3h4a3 3 0 013 3v2" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="14" r="2" fill="#0d5c2e"/></svg> Connect';
+  document.getElementById('connectBtn').innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 8 21.1 7 20 7Z"/><path d="M16 7V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7"/><circle cx="16" cy="14" r="2" fill="white" stroke="none"/></svg> Connect';
   document.getElementById('connectBtn').classList.remove('on');
   document.getElementById('flipBtn').disabled = true;
-  document.getElementById('flipBtn').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><polygon points="5,3 19,12 5,21" fill="white"/></svg> Connect Wallet to Play';
+  document.getElementById('flipBtn').innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 8 21.1 7 20 7Z"/><path d="M16 7V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7"/><circle cx="16" cy="14" r="2" fill="white" stroke="none"/></svg> Connect Wallet to Play';
   document.getElementById('flipBtn').classList.add('connect-state');
   document.getElementById('balNum').innerHTML = '—<span class="bal-unit">SOL</span>';
   document.getElementById('balHint').textContent = 'Connect your wallet to start playing';
   updateMyHistVisibility();
+  if (typeof syncMobFlipBtn === 'function') syncMobFlipBtn();
+  if (typeof syncMobHistory === 'function') syncMobHistory();
   // TG: hide back button on disconnect
   if (isTelegram) window.Telegram.WebApp.BackButton.hide();
 }
@@ -2503,6 +2954,17 @@ async function doFlip() {
   pnl += delta;
   updateStats();
   addHist({ bet, side, result: res.result, won: res.playerWon, delta });
+
+  // Post system message to chat
+  if (typeof postChatMsg === 'function') {
+    const addr = wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '???';
+    if (res.playerWon) {
+      postChatMsg(`${addr} won +${res.payoutSol.toFixed(4)} SOL on ${res.result.toUpperCase()} 🏆`, 'system-win');
+    } else {
+      postChatMsg(`${addr} lost ${bet.toFixed(4)} SOL on ${res.result.toUpperCase()} 💀`, 'system-loss');
+    }
+  }
+
   await refreshBal();
   done();
 }
@@ -2512,6 +2974,7 @@ function done() {
   document.getElementById('flipBtn').disabled = false;
   document.getElementById('flipBtn').textContent = 'FLIP';
   document.getElementById('flipBtn').classList.remove('connect-state');
+  if (typeof syncMobFlipBtn === 'function') syncMobFlipBtn();
 }
 
 /* ── Telegram helpers (Updates 3 & 5) ── */
@@ -2889,6 +3352,248 @@ document.querySelectorAll('button:not(#soundBtn), .quick-chip, .side-card, .adj-
 
 // Auto-refresh balance
 setInterval(() => { if (wallet) refreshBal(); }, 30000);
+
+/* ══════════════════════════════════════
+   CHAT SYSTEM
+══════════════════════════════════════ */
+const CHAT_NAMES = ['CryptoWhale','SolKing','FlipMaster','LuckyFlip','DiamondHands',
+  'MoonRider','SolSurfer','CoinLord','FlipGod','GoldRush'];
+let myName = localStorage.getItem('chatName') || CHAT_NAMES[Math.floor(Math.random()*CHAT_NAMES.length)];
+let chatLastIds = new Set();
+
+// Init name inputs
+(function initChatName() {
+  const ni  = document.getElementById('chatNameInput');
+  const nim = document.getElementById('chatNameInputMob');
+  if (ni)  { ni.value  = myName; ni.addEventListener('change',  () => { myName = ni.value.trim()||myName; localStorage.setItem('chatName',myName); if(nim) nim.value=myName; }); }
+  if (nim) { nim.value = myName; nim.addEventListener('change', () => { myName = nim.value.trim()||myName; localStorage.setItem('chatName',myName); if(ni)  ni.value=myName; }); }
+})();
+
+const CHAT_COLORS = ['#e8c060','#4ade80','#60a5fa','#f472b6','#a78bfa','#fb923c','#34d399','#f87171'];
+function nameColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h<<5)-h);
+  return CHAT_COLORS[Math.abs(h) % CHAT_COLORS.length];
+}
+function initials(name) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0][0]||'')+(parts[1]?parts[1][0]:parts[0][1]||'')).toUpperCase().slice(0,2)||'?';
+}
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+
+function buildMsgEl(msg) {
+  const div = document.createElement('div');
+  if (msg.type && msg.type !== 'user') {
+    const sysClass = msg.type==='system-win' ? 'sys-win' : msg.type==='system-loss' ? 'sys-loss' : '';
+    div.className = `chat-msg sys ${sysClass}`;
+    div.innerHTML = `<div class="chat-msg-text">${msg.text}</div>`;
+  } else {
+    const color = nameColor(msg.username);
+    const bg = color+'22';
+    div.className = 'chat-msg';
+    div.innerHTML = `
+      <div class="chat-avatar" style="background:${bg};color:${color}">${initials(msg.username)}</div>
+      <div class="chat-msg-body">
+        <div class="chat-msg-meta">
+          <span class="chat-msg-name" style="color:${color}">${msg.username}</span>
+          <span class="chat-msg-time">${fmtTime(msg.timestamp)}</span>
+        </div>
+        <div class="chat-msg-text">${msg.text}</div>
+      </div>`;
+  }
+  return div;
+}
+
+function renderChatMsgs(msgs, container, emptyEl) {
+  if (!container) return;
+  if (!msgs || !msgs.length) { if(emptyEl) emptyEl.style.display=''; return; }
+  if (emptyEl) emptyEl.style.display = 'none';
+  msgs.forEach(msg => {
+    const id = String(msg.id);
+    if (!chatLastIds.has(id)) {
+      chatLastIds.add(id);
+      container.appendChild(buildMsgEl(msg));
+    }
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+async function fetchChatMsgs() {
+  try {
+    const r = await fetch('/api/chat/messages');
+    const msgs = await r.json();
+    renderChatMsgs(msgs, document.getElementById('chatMsgs'),    document.getElementById('chatEmpty'));
+    renderChatMsgs(msgs, document.getElementById('chatMsgsMob'), document.getElementById('chatEmptyMob'));
+    const n = Math.max(1, Math.min(msgs.length, 8) + Math.floor(Math.random()*3));
+    const oc = document.getElementById('chatOnlineCount');      if(oc)  oc.textContent  = n+' online';
+    const ocm= document.getElementById('chatOnlineCountMob');   if(ocm) ocm.textContent = n+' online';
+  } catch(e) {}
+}
+fetchChatMsgs();
+setInterval(fetchChatMsgs, 3000);
+
+async function postChatMsg(text, type) {
+  try {
+    await fetch('/api/chat/send', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: myName, text, wallet: wallet||null, type: type||'user' })
+    });
+    await fetchChatMsgs();
+  } catch(e){}
+}
+
+function sendChatMsg() {
+  const el = document.getElementById('chatTextInput');
+  const txt = el ? el.value.trim() : '';
+  if (!txt) return;
+  el.value = '';
+  postChatMsg(txt, 'user');
+}
+function sendChatMsgMob() {
+  const el = document.getElementById('chatTextInputMob');
+  const txt = el ? el.value.trim() : '';
+  if (!txt) return;
+  el.value = '';
+  postChatMsg(txt, 'user');
+}
+
+/* ══════════════════════════════════════
+   MOBILE BOTTOM NAV
+══════════════════════════════════════ */
+let currentMobTab = 'play';
+
+function switchMobTab(tab) {
+  if (window.innerWidth > 900) return;
+  currentMobTab = tab;
+
+  // Update active tab highlights
+  ['play','chat','history'].forEach(t => {
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+      .classList.toggle('active', t === tab);
+  });
+
+  // Elements to hide/show
+  const playContent = document.querySelector('.page');
+  const ticker      = document.querySelector('.live-ticker');
+  const mobFlip     = document.getElementById('mobFlipFixed');
+  const mobChat     = document.getElementById('mobChat');
+  const mobHist     = document.getElementById('mobHistory');
+
+  // Hide all panels instantly
+  if (playContent) playContent.style.display = 'none';
+  if (ticker)      ticker.style.display      = 'none';
+  if (mobFlip)     mobFlip.style.display     = 'none';
+  if (mobChat)     mobChat.style.display     = 'none';
+  if (mobHist)     mobHist.style.display     = 'none';
+
+  if (tab === 'play') {
+    if (playContent) playContent.style.display = '';
+    if (ticker)      ticker.style.display      = '';
+    if (mobFlip)     mobFlip.style.display     = '';
+
+  } else if (tab === 'chat') {
+    // Mark chat as opened — hide blinking dot permanently
+    if (!localStorage.getItem('chatOpened')) {
+      localStorage.setItem('chatOpened', '1');
+    }
+    const dot = document.getElementById('mobChatDot');
+    if (dot) dot.classList.add('seen');
+
+    if (mobChat) mobChat.style.display = 'flex';
+    setTimeout(() => {
+      const cm = document.getElementById('chatMsgsMob');
+      if (cm) cm.scrollTop = cm.scrollHeight;
+    }, 50);
+
+  } else if (tab === 'history') {
+    if (mobHist) mobHist.style.display = 'flex';
+    syncMobHistory();
+  }
+}
+
+function syncMobHistory() {
+  const connect = document.getElementById('mobHistConnect');
+  const content = document.getElementById('mobHistContent');
+  const tbody   = document.getElementById('mobHistBody');
+  if (!connect || !content) return;
+  if (!wallet) {
+    connect.style.display = ''; content.style.display = 'none';
+  } else {
+    connect.style.display = 'none'; content.style.display = 'flex';
+    if (tbody) {
+      tbody.innerHTML = hist.length
+        ? hist.slice(0,50).map(f => `
+          <tr>
+            <td>${parseFloat(f.bet).toFixed(3)} SOL</td>
+            <td>${f.side} → <b>${f.result}</b></td>
+            <td><span class="hist-pill ${f.won?'pill-w':'pill-l'}">${f.won?'WIN':'LOSS'}</span></td>
+            <td class="${f.delta>=0?'hist-pos':'hist-neg'}">${f.delta>=0?'+':''}${f.delta.toFixed(3)} SOL</td>
+          </tr>`).join('')
+        : '<tr><td colspan="4"><div class="hist-empty">— No flips yet —</div></td></tr>';
+    }
+  }
+}
+
+function syncMobFlipBtn() {
+  const btn = document.getElementById('mobFlipBtn');
+  if (!btn) return;
+  if (!wallet) {
+    btn.disabled   = true;
+    btn.className  = 'connect-state';
+    btn.onclick    = connectWallet;
+    btn.innerHTML  = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H4C2.9 7 2 7.9 2 9V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V9C22 8 21.1 7 20 7Z"/><path d="M16 7V5C16 3.9 15.1 3 14 3H10C8.9 3 8 3.9 8 5V7"/><circle cx="16" cy="14" r="2" fill="white" stroke="none"/></svg> Connect Wallet to Play`;
+  } else if (busy) {
+    btn.disabled      = true;
+    btn.className     = '';
+    btn.textContent   = 'Flipping\u2026';
+  } else {
+    btn.disabled   = false;
+    btn.className  = '';
+    btn.textContent = 'FLIP';
+    btn.onclick    = doFlip;
+  }
+}
+
+(function initMobileNav() {
+  const isMob = window.innerWidth <= 900;
+  const nav   = document.getElementById('mobBotNav');
+  const ff    = document.getElementById('mobFlipFixed');
+  const mobChat = document.getElementById('mobChat');
+  const mobHist = document.getElementById('mobHistory');
+
+  if (!isMob) {
+    if (nav) nav.style.display = 'none';
+    if (ff)  ff.style.display  = 'none';
+    return;
+  }
+
+  // On mobile: hide chat and history panels initially
+  if (mobChat) mobChat.style.display = 'none';
+  if (mobHist) mobHist.style.display = 'none';
+
+  // Restore dot state from localStorage
+  if (localStorage.getItem('chatOpened')) {
+    const dot = document.getElementById('mobChatDot');
+    if (dot) dot.classList.add('seen');
+  }
+
+  syncMobFlipBtn();
+})();
+
+/* Visual viewport resize — keep chat input above keyboard on mobile */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const chat = document.getElementById('mobChat');
+    if (!chat || chat.style.display === 'none') return;
+    const vh = window.visualViewport.height;
+    const headerH = 64;
+    chat.style.bottom = (window.innerHeight - vh) + 'px';
+    chat.style.top    = headerH + 'px';
+  });
+}
 </script>
 </body>
 </html>

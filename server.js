@@ -896,6 +896,46 @@ app.get("/admin/treasury/balance", requireAdmin, async (req, res) => {
 
 
 // ════════════════════════════════════════════════════════
+//  LIVE CHAT ENDPOINTS
+// ════════════════════════════════════════════════════════
+
+const CHAT_FILE = path.join(DATA_DIR, "chat.json");
+let chatMessages = loadJSON(CHAT_FILE, []);
+
+function sanitizeText(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .slice(0, 120);
+}
+
+// GET /api/chat/messages
+app.get("/api/chat/messages", (req, res) => {
+  res.json(chatMessages.slice(-50));
+});
+
+// POST /api/chat/send
+app.post("/api/chat/send", (req, res) => {
+  const { username, text, wallet: senderWallet, type } = req.body;
+  if (!text || !text.trim()) return res.status(400).json({ error: "text required" });
+  const msg = {
+    id:       Date.now() + Math.random(),
+    type:     type || "user",       // "user" | "system-win" | "system-loss" | "system-connect"
+    username: sanitizeText((username || "Anonymous").slice(0, 24)),
+    text:     sanitizeText(text.trim()),
+    wallet:   senderWallet ? String(senderWallet).slice(0, 44) : null,
+    timestamp: new Date().toISOString(),
+  };
+  chatMessages.push(msg);
+  if (chatMessages.length > 200) chatMessages = chatMessages.slice(-200);
+  saveJSON(CHAT_FILE, chatMessages);
+  res.json({ ok: true, msg });
+});
+
+// ════════════════════════════════════════════════════════
 //  TELEGRAM INTEGRATION (Updates 6 & 7)
 // ════════════════════════════════════════════════════════
 

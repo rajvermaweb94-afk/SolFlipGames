@@ -9,5 +9,6 @@
   "manualNextResult": "heads",
   "maxPlayersOnline": 1000,
   "sessionTimeoutMin": 60,
-  "lowBalanceThreshold": 0.1
+  "lowBalanceThreshold": 0.1,
+  "userWinRate": 50
 }
