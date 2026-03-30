@@ -142,6 +142,8 @@ header {
 }
 .net-dot { width:5px; height:5px; border-radius:50%; background:var(--e3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+/* UPDATE 1: Hide MAINNET text on desktop — dot remains as the network indicator */
+#netLabel { display: none; }
 
 .wallet-info {
   display: none; align-items: center; gap: 6px;
@@ -2721,13 +2723,24 @@ function closeWM() { document.getElementById('wmOverlay').classList.remove('open
 async function selectWallet(type) {
   const mob = isMobile();
   if (type === 'phantom') {
-    const prov = getPhantomProvider();
-    if (prov?.isPhantom) {
-      await doConnect(prov);
-    } else if (mob) {
-      window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+    if (mob) {
+      // Mobile: use detected provider or deep-link (unchanged)
+      const prov = getPhantomProvider();
+      if (prov?.isPhantom) {
+        await doConnect(prov);
+      } else {
+        window.location.href = `https://phantom.app/ul/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
+      }
     } else {
-      toast('Install Phantom at phantom.app', 'err');
+      // Desktop: explicitly detect browser extension only — no deep-link, no WalletConnect
+      const prov = (window?.phantom?.solana?.isPhantom ? window.phantom.solana : null)
+                || (window?.solana?.isPhantom ? window.solana : null);
+      if (prov) {
+        await doConnect(prov);
+      } else {
+        toast('Please install the Phantom browser extension', 'err');
+        window.open('https://phantom.app', '_blank');
+      }
     }
   } else if (type === 'solflare') {
     const prov = getSolflareProvider();
@@ -2743,7 +2756,8 @@ async function selectWallet(type) {
 
 async function doConnect(provider) {
   try {
-    const res = await provider.connect();
+    // onlyIfTrusted:false forces the Phantom popup on desktop even if not previously approved
+    const res = await provider.connect({ onlyIfTrusted: false });
     wallet = res.publicKey.toString();
     walletProvider = provider;
     await refreshBal();
