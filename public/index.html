@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SOLFLIP — Heads or Tails on Solana</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -267,16 +267,18 @@ header {
 /* ─── HT HEADER STRIP (above coin stage) ─── */
 .ht-header-strip {
   width: 100%;
+  max-width: 100%;
   height: 38px;
   background: #0a0e1a;
   border: 1px solid var(--line);
   border-bottom: 1px solid rgba(201,160,48,0.15);
   border-radius: 12px 12px 0 0;
-  overflow: hidden;
+  overflow: hidden;          /* CRITICAL: never grow wider than parent */
   display: flex;
   align-items: center;
   flex-shrink: 0;
   position: relative;
+  box-sizing: border-box;
 }
 .ht-header-live {
   position: absolute; left: 0; top: 0; bottom: 0; z-index: 2;
@@ -284,6 +286,7 @@ header {
   padding: 3px 10px;
   background: linear-gradient(90deg, #0a0e1a 70%, transparent 100%);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .ht-header-live-dot {
   width: 6px; height: 6px; border-radius: 50%;
@@ -297,11 +300,21 @@ header {
   font-size: 0.6rem; font-weight: 700;
   letter-spacing: 0.12em; color: #ef4444;
 }
+/* HT scroll container: clips at strip boundary, never overflows */
+.ht-header-scroll-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 68px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
 .ht-header-scroll {
   display: flex; align-items: center; gap: 8px;
-  padding-left: 70px;
   animation: htScroll 20s linear infinite;
   white-space: nowrap;
+  /* No width set — content-driven, clipped by parent overflow:hidden */
 }
 .ht-placeholder {
   font-family: 'JetBrains Mono', monospace;
@@ -1885,8 +1898,10 @@ header {
         <span class="ht-header-live-dot"></span>
         <span class="ht-header-live-lbl">LIVE</span>
       </div>
-      <div class="ht-header-scroll" id="htTrack">
-        <span class="ht-placeholder">Waiting for first flip…</span>
+      <div class="ht-header-scroll-wrap">
+        <div class="ht-header-scroll" id="htTrack">
+          <span class="ht-placeholder">Waiting for first flip…</span>
+        </div>
       </div>
     </div>
 
@@ -3150,11 +3165,11 @@ function updateMyHistVisibility() {
   }
 }
 
-/* ── H&T Strip (above coin stage, real flips only) ── */
+/* ── H&T Strip (above coin stage) — capped at 20, no duplication ── */
 let htResults = [];
 function updateHtStrip(result) {
   htResults.unshift(result === 'heads' ? 'h' : 't');
-  if (htResults.length > 30) htResults.pop();
+  if (htResults.length > 20) htResults.pop(); // cap at 20 — no layout growth
   renderHtStrip();
 }
 function renderHtStrip() {
@@ -3165,6 +3180,7 @@ function renderHtStrip() {
     track.style.animation = 'none';
     return;
   }
+  // Build badges — NO duplication (parent overflow:hidden handles clipping)
   const items = htResults.map((r, i) => {
     const cls = r === 'h' ? 'htb-h' : 'htb-t';
     const lbl = r === 'h' ? 'H' : 'T';
@@ -3174,8 +3190,7 @@ function renderHtStrip() {
     return `<span class="htb ${cls}">${lbl}</span>`;
   }).join('');
   track.style.animation = '';
-  // Duplicate for seamless scroll, only if enough items
-  track.innerHTML = htResults.length >= 6 ? items + items : items;
+  track.innerHTML = items; // no duplication — fixes mobile layout expansion
 }
 
 /* ── Live Ticker ── */
@@ -3183,12 +3198,13 @@ let tickerFlips = [];
 function updateTicker(flip) {
   tickerFlips.unshift(flip);
   if (tickerFlips.length > 20) tickerFlips.pop();
+  // Always re-render ticker (merges local + server perspective)
   renderTicker();
 }
 
-/* ── Server-side live flip feed (visible to ALL visitors, no login needed) ── */
+/* ── Server-side live flip feed — ALWAYS visible to ALL visitors ── */
 let _liveLastId = 0;
-let _liveHtResults = [];
+let _liveServerFlips = []; // keep latest server flips for rendering
 async function fetchLiveFlips() {
   try {
     const r = await fetch('/api/history');
@@ -3196,51 +3212,67 @@ async function fetchLiveFlips() {
     const flips = await r.json();
     if (!flips || !flips.length) return;
 
-    // Check if there are new flips (by comparing first flip id/timestamp)
-    const newestId = flips[0].id || 0;
-    if (newestId === _liveLastId) return; // nothing new
-    _liveLastId = newestId;
+    // Use timestamp string as unique marker (id may be 0 for old entries)
+    const newestMarker = flips[0].timestamp || flips[0].id || '';
+    if (newestMarker === _liveLastId) return; // nothing new
+    _liveLastId = newestMarker;
 
-    // Build ticker items from server flips (for all visitors)
-    // Only update if the player hasn't already generated local ticker items
-    if (!tickerFlips.length) {
-      const serverItems = flips.slice(0, 20).map(f => ({
-        won: f.playerWon,
-        delta: f.playerWon ? f.payoutSol - f.betSol : -f.betSol,
-        addr: f.playerPubkey,
-        bet: f.betSol,
-      }));
-      // Build special server ticker (uses addr, not local wallet)
-      renderTickerFromServer(serverItems);
-    }
+    // Always store latest server flips
+    _liveServerFlips = flips;
 
-    // Update H&T strip from server flips if local player hasn't played yet
+    // ── Ticker strip: always render from server (most up-to-date global view) ──
+    // If local player has flipped, their flips are already in tickerFlips;
+    // we use server data to populate any missing entries for unconnected visitors.
+    const serverTickerItems = flips.slice(0, 20).map(f => ({
+      won: f.playerWon,
+      delta: f.playerWon ? (f.payoutSol - f.betSol) : (-f.betSol),
+      addr: f.playerPubkey || '???',
+      bet: f.betSol,
+    }));
+    renderTickerFromServer(serverTickerItems);
+
+    // ── H&T strip: always update from server unless local player has recent flips ──
+    // Local player flips take priority (fresher), but fallback to server for visitors.
     if (!htResults.length) {
-      _liveHtResults = flips.slice(0, 30).map(f => f.result === 'heads' ? 'h' : 't');
-      renderHtStripFromServer(_liveHtResults);
+      // No local flips yet — populate from server (cap at 20)
+      const serverHt = flips.slice(0, 20).map(f => f.result === 'heads' ? 'h' : 't');
+      renderHtStripFromServer(serverHt);
     }
+    // If local htResults exist, they're already rendered — no override needed
   } catch(e) {}
 }
 
 function renderTickerFromServer(items) {
   const track = document.getElementById('tickerTrack');
   if (!track || !items.length) return;
+  // Don't overwrite if local player has their own ticker flips
+  if (tickerFlips.length) return;
   const html = items.map(f => {
     const valClass = f.won ? 'ticker-win' : 'ticker-loss';
-    const valText  = f.won ? '+' + Math.abs(f.delta).toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
-    const addr = f.addr || '???';
+    const delta = typeof f.delta === 'number' ? f.delta : 0;
+    const valText = f.won
+      ? '+' + Math.abs(delta).toFixed(3) + ' SOL'
+      : delta.toFixed(3) + ' SOL';
+    const addrRaw = f.addr || '???';
+    // Shorten address: 4chars…4chars
+    const addr = addrRaw.length > 12
+      ? addrRaw.slice(0,4) + '…' + addrRaw.slice(-4)
+      : addrRaw;
     return `<span class="ticker-item"><span class="ticker-addr">${addr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
   }).join('');
+  // Duplicate for seamless infinite scroll animation
   track.innerHTML = html + html;
   track.style.animation = '';
-  const dur = Math.max(20, items.length * 4);
+  const dur = Math.max(20, items.length * 3);
   track.style.animationDuration = dur + 's';
 }
 
 function renderHtStripFromServer(results) {
+  // Cap at 20 items — never let it grow the layout
+  const capped = results.slice(0, 20);
   const track = document.getElementById('htTrack');
-  if (!track || !results.length) return;
-  const items = results.map((r, i) => {
+  if (!track || !capped.length) return;
+  const items = capped.map((r, i) => {
     const cls = r === 'h' ? 'htb-h' : 'htb-t';
     const lbl = r === 'h' ? 'H' : 'T';
     if (i === 0) {
@@ -3248,13 +3280,13 @@ function renderHtStripFromServer(results) {
     }
     return `<span class="htb ${cls}">${lbl}</span>`;
   }).join('');
-  track.style.animation = '';
-  track.innerHTML = results.length >= 6 ? items + items : items;
+  track.style.animation = 'none'; // static display, no scroll animation
+  track.innerHTML = items;         // no duplication — fixes mobile shrink bug
 }
 
-// Start polling immediately and every 6s — works for all visitors without login
+// Poll immediately on load, then every 3s for real-time feel
 fetchLiveFlips();
-setInterval(fetchLiveFlips, 6000);
+setInterval(fetchLiveFlips, 3000);
 function renderTicker() {
   const track = document.getElementById('tickerTrack');
   if (!tickerFlips.length) {
