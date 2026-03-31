@@ -935,6 +935,14 @@ app.post("/api/chat/send", (req, res) => {
   res.json({ ok: true, msg });
 });
 
+// POST /admin/chat/clear  — wipe all messages (admin only)
+app.post("/admin/chat/clear", requireAdmin, (req, res) => {
+  chatMessages = [];
+  saveJSON(CHAT_FILE, chatMessages);
+  console.log("🗑️  Chat cleared by admin");
+  res.json({ ok: true, cleared: true });
+});
+
 // ════════════════════════════════════════════════════════
 //  TELEGRAM INTEGRATION (Updates 6 & 7)
 // ════════════════════════════════════════════════════════
