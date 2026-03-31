@@ -1829,16 +1829,7 @@ header {
         </div>
         <span class="wm-badge" id="wmPhBadge">—</span>
       </div>
-      <div class="wm-opt" onclick="selectWallet('solflare')">
-        <div class="wm-icon solflare-ic">
-          <svg viewBox="0 0 128 128" fill="none"><circle cx="64" cy="64" r="36" stroke="white" stroke-width="6" fill="none"/><path d="M64 20V8M64 120v-12M20 64H8M120 64h-12M34 34L25 25M103 103l-9-9M34 94l-9 9M103 25l-9 9" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>
-        </div>
-        <div class="wm-info">
-          <div class="wm-name">Solflare</div>
-          <div class="wm-sub">Solana DeFi wallet</div>
-        </div>
-        <span class="wm-badge" id="wmSfBadge">—</span>
-      </div>
+
     </div>
   </div>
 </div>
@@ -2708,14 +2699,11 @@ function connectWallet() {
       return;
     }
   }
-  // Update badges
+  // Update badge for Phantom only
   const phProv = getPhantomProvider();
-  const sfProv = getSolflareProvider();
   const mob = isMobile();
   document.getElementById('wmPhBadge').textContent = phProv?.isPhantom ? 'Detected' : (mob ? 'Open App' : 'Not Found');
   document.getElementById('wmPhBadge').className = 'wm-badge ' + (phProv?.isPhantom ? 'detected' : (mob ? 'openapp' : ''));
-  document.getElementById('wmSfBadge').textContent = sfProv?.isSolflare ? 'Detected' : (mob ? 'Open App' : 'Not Found');
-  document.getElementById('wmSfBadge').className = 'wm-badge ' + (sfProv?.isSolflare ? 'detected' : (mob ? 'openapp' : ''));
   document.getElementById('wmOverlay').classList.add('open');
 }
 function closeWM() { document.getElementById('wmOverlay').classList.remove('open'); }
@@ -2741,15 +2729,6 @@ async function selectWallet(type) {
         toast('Please install the Phantom browser extension', 'err');
         window.open('https://phantom.app', '_blank');
       }
-    }
-  } else if (type === 'solflare') {
-    const prov = getSolflareProvider();
-    if (prov?.isSolflare) {
-      await doConnect(prov);
-    } else if (mob) {
-      window.location.href = `https://solflare.com/ul/v1/browse/${encodeURIComponent(SITE_URL)}?ref=${encodeURIComponent(SITE_URL)}`;
-    } else {
-      toast('Install Solflare at solflare.com', 'err');
     }
   }
 }
@@ -3051,7 +3030,9 @@ async function doFlip() {
   // Stats
   totalFlips++;
   if (res.playerWon) totalWins++;
-  const delta = res.playerWon ? res.payoutSol - bet : -bet;
+  // Guard payoutSol — server may omit it on some responses; fall back to 1.92× calculation
+  const payoutSol = parseFloat(res.payoutSol);
+  const delta = res.playerWon ? (isNaN(payoutSol) ? bet * 0.92 : payoutSol - bet) : -bet;
   pnl += delta;
   updateStats();
   addHist({ bet, side, result: res.result, won: res.playerWon, delta });
@@ -3336,7 +3317,9 @@ function renderTicker() {
   const myAddr = wallet ? wallet.slice(0,4)+'…'+wallet.slice(-4) : '???';
   const items = tickerFlips.map(f => {
     const valClass = f.won ? 'ticker-win' : 'ticker-loss';
-    const valText = f.won ? '+' + f.delta.toFixed(3) + ' SOL' : f.delta.toFixed(3) + ' SOL';
+    // Guard against NaN — delta must be a valid finite number
+    const safeD = (typeof f.delta === 'number' && isFinite(f.delta)) ? f.delta : 0;
+    const valText = f.won ? '+' + Math.abs(safeD).toFixed(3) + ' SOL' : safeD.toFixed(3) + ' SOL';
     return `<span class="ticker-item"><span class="ticker-addr">${myAddr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
   }).join('');
   track.innerHTML = items + items;
