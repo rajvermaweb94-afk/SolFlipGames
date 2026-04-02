@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SolFlip — Players Winning Now</title>
+<meta name="description" content="1000s are flipping SOL right now. Join SolFlip and win 1.92x instantly on Solana."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Syne+Mono&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b18;
+  --bg2:#0d1128;
+  --bg3:#111830;
+  --gold:#FFD700;
+  --gold2:#FFC107;
+  --gold3:#ffec6e;
+  --green:#00FFA3;
+  --green2:#00d484;
+  --red:#ff3b3b;
+  --white:#eef2ff;
+  --muted:#6b7db3;
+  --card:rgba(255,255,255,0.035);
+  --border:rgba(255,215,0,0.12);
+  --font-display:'Syne',sans-serif;
+  --font-mono:'Syne Mono',monospace;
+  --font-body:'Manrope',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:var(--font-body);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Background grid ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,215,0,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,215,0,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── Glow orbs ── */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+.orb-gold{width:300px;height:300px;background:rgba(255,215,0,0.07);top:-60px;left:50%;transform:translateX(-50%);animation:orbFloat 7s ease-in-out infinite alternate}
+.orb-green{width:220px;height:220px;background:rgba(0,255,163,0.06);bottom:80px;right:-40px;animation:orbFloat2 9s ease-in-out infinite alternate}
+.orb-red{width:180px;height:180px;background:rgba(255,59,59,0.05);top:200px;left:-50px;animation:orbFloat 11s 2s ease-in-out infinite alternate}
+@keyframes orbFloat{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.3)}}
+@keyframes orbFloat2{from{transform:scale(1) rotate(0deg)}to{transform:scale(1.4) rotate(15deg)}}
+
+/* ── Layout ── */
+.page{
+  position:relative;z-index:1;
+  max-width:460px;margin:0 auto;
+  padding:0 0 60px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* ─────────────────────────────────
+   1. LIVE BADGE
+───────────────────────────────── */
+.live-badge{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 22px;
+  background:rgba(255,59,59,0.12);
+  border-bottom:1px solid rgba(255,59,59,0.25);
+  width:100%;
+  justify-content:center;
+  font-size:13px;font-weight:700;
+  letter-spacing:1.5px;
+  color:#ff6b6b;
+  text-transform:uppercase;
+}
+.live-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 6px var(--red);
+  animation:livePulse 1s ease-in-out infinite;
+}
+@keyframes livePulse{
+  0%,100%{box-shadow:0 0 4px var(--red),0 0 10px var(--red)}
+  50%{box-shadow:0 0 10px var(--red),0 0 24px rgba(255,59,59,0.5)}
+}
+
+/* ─────────────────────────────────
+   2. TICKER
+───────────────────────────────── */
+.ticker-wrap{
+  width:100%;overflow:hidden;
+  background:rgba(0,0,0,0.35);
+  border-bottom:1px solid rgba(255,215,0,0.08);
+  padding:0;height:38px;display:flex;align-items:center;
+  position:relative;
+}
+.ticker-wrap::before,
+.ticker-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,rgba(8,11,24,1),transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,rgba(8,11,24,1),transparent)}
+
+.ticker-track{
+  display:flex;gap:0;
+  white-space:nowrap;
+  animation:ticker 22s linear infinite;
+}
+.ticker-item{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12.5px;font-family:var(--font-mono);
+  color:var(--muted);
+  padding:0 28px;
+  border-right:1px solid rgba(255,215,0,0.07);
+}
+.ticker-item .wallet{color:var(--gold);font-weight:700}
+.ticker-item .amount{color:var(--green);font-weight:700}
+.ticker-item .side-heads{color:#60a5fa}
+.ticker-item .side-tails{color:#c084fc}
+
+@keyframes ticker{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
+/* ─────────────────────────────────
+   3. COIN ANIMATION
+───────────────────────────────── */
+.coin-stage{
+  margin-top:36px;
+  position:relative;
+  width:130px;height:130px;
+  display:flex;align-items:center;justify-content:center;
+  animation: fadeDown 0.6s ease both;
+}
+.coin-glow{
+  position:absolute;inset:-20px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,215,0,0.22) 0%,transparent 70%);
+  animation:glowPulse 2s ease-in-out infinite alternate;
+}
+@keyframes glowPulse{
+  from{opacity:0.6;transform:scale(0.9)}
+  to{opacity:1;transform:scale(1.15)}
+}
+.coin{
+  width:110px;height:110px;
+  border-radius:50%;
+  background:conic-gradient(from 0deg,#b8860b,#ffd700,#fffacd,#ffd700,#daa520,#ffd700,#fffacd,#ffd700,#b8860b);
+  box-shadow:
+    0 0 0 3px rgba(255,215,0,0.3),
+    0 0 30px rgba(255,215,0,0.5),
+    0 0 70px rgba(255,215,0,0.2),
+    inset 0 2px 6px rgba(255,255,255,0.4),
+    inset 0 -2px 6px rgba(0,0,0,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+  animation:coinFlip 2.8s ease-in-out infinite;
+  transform-style:preserve-3d;
+  cursor:pointer;
+  position:relative;
+  z-index:1;
+}
+@keyframes coinFlip{
+  0%{transform:rotateY(0deg) scale(1)}
+  20%{transform:rotateY(180deg) scale(1.08)}
+  40%{transform:rotateY(360deg) scale(1)}
+  100%{transform:rotateY(360deg) scale(1)}
+}
+.coin-ring{
+  position:absolute;
+  width:126px;height:126px;
+  border-radius:50%;
+  border:2px solid rgba(255,215,0,0.2);
+  animation:ringPing 2.8s ease-out infinite;
+}
+.coin-ring2{
+  position:absolute;
+  width:126px;height:126px;
+  border-radius:50%;
+  border:2px solid rgba(255,215,0,0.1);
+  animation:ringPing 2.8s 0.4s ease-out infinite;
+}
+@keyframes ringPing{
+  0%{transform:scale(1);opacity:0.8}
+  100%{transform:scale(1.5);opacity:0}
+}
+
+/* ─────────────────────────────────
+   4 & 5. HEADLINE + PAYOUT
+───────────────────────────────── */
+.content{
+  padding:0 20px;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;
+}
+
+.headline{
+  font-family:var(--font-display);
+  font-size:clamp(30px,9vw,44px);
+  font-weight:800;
+  text-align:center;
+  line-height:1.1;
+  margin-top:28px;
+  letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#fff 10%,var(--gold) 60%,var(--gold3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:fadeUp 0.6s 0.15s ease both;
+}
+
+.sub{
+  font-size:14px;font-weight:500;
+  color:var(--muted);
+  text-align:center;
+  margin-top:10px;
+  animation:fadeUp 0.6s 0.25s ease both;
+}
+
+/* Live player counter */
+.player-bar{
+  display:flex;align-items:center;gap:10px;
+  margin-top:22px;
+  background:rgba(0,255,163,0.06);
+  border:1px solid rgba(0,255,163,0.15);
+  border-radius:40px;
+  padding:8px 20px;
+  animation:fadeUp 0.6s 0.3s ease both;
+}
+.player-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 6px var(--green);
+  animation:livePulse2 1.2s ease-in-out infinite;
+}
+@keyframes livePulse2{
+  0%,100%{box-shadow:0 0 4px var(--green)}
+  50%{box-shadow:0 0 12px var(--green),0 0 24px rgba(0,255,163,0.3)}
+}
+.player-text{font-size:13px;font-weight:600;color:var(--green)}
+.player-count{font-family:var(--font-mono);font-weight:700}
+
+/* Payout box */
+.payout-box{
+  margin-top:28px;
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:22px 24px;
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  position:relative;overflow:hidden;
+  animation:fadeUp 0.6s 0.35s ease both;
+}
+.payout-box::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,215,0,0.04),transparent 60%);
+  pointer-events:none;
+}
+.payout-row{
+  display:flex;align-items:center;justify-content:center;
+  gap:16px;width:100%;
+  flex-wrap:wrap;
+}
+.payout-side{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  flex:1;min-width:110px;
+}
+.payout-label{
+  font-size:11px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);
+}
+.payout-amount{
+  font-family:var(--font-display);
+  font-size:32px;font-weight:700;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(255,215,0,0.4);
+}
+.payout-amount.win{color:var(--green);text-shadow:0 0 20px rgba(0,255,163,0.4)}
+.payout-unit{font-size:13px;font-weight:600;color:var(--muted)}
+
+.arrow-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:10px 4px;
+}
+.arrow-line{
+  width:2px;background:rgba(255,215,0,0.25);
+  border-radius:2px;
+}
+.arrow-line:nth-child(1){height:18px}
+.arrow-head{
+  font-size:20px;color:var(--gold);opacity:0.6;
+  line-height:1;
+}
+
+.multiplier-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,255,163,0.1);
+  border:1px solid rgba(0,255,163,0.2);
+  border-radius:30px;
+  padding:6px 18px;
+  font-size:13px;font-weight:700;
+  color:var(--green);
+}
+.mult-val{font-family:var(--font-mono);font-size:15px}
+
+/* ─────────────────────────────────
+   6. CTA BUTTON
+───────────────────────────────── */
+.cta-wrap{
+  margin-top:28px;width:100%;
+  animation:fadeUp 0.6s 0.45s ease both;
+}
+.cta-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;
+  padding:22px 24px;
+  border-radius:18px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#1a1000;
+  font-family:var(--font-display);
+  font-size:clamp(22px,6vw,28px);
+  letter-spacing:2px;
+  font-weight:800;
+  text-decoration:none;
+  text-align:center;
+  position:relative;overflow:hidden;
+  box-shadow:
+    0 0 30px rgba(255,215,0,0.4),
+    0 0 80px rgba(255,215,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+  transition:transform 0.18s,box-shadow 0.18s;
+  animation:goldPulse 2.2s 1s ease-in-out infinite;
+  cursor:pointer;
+}
+.cta-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,transparent 50%);
+  pointer-events:none;
+}
+.cta-btn:hover{
+  transform:translateY(-3px) scale(1.01);
+  box-shadow:0 0 50px rgba(255,215,0,0.6),0 0 120px rgba(255,215,0,0.25),inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.cta-btn:active{transform:translateY(0) scale(0.98)}
+.cta-arrow{
+  display:inline-block;
+  animation:arrowBounce 1s ease-in-out infinite;
+}
+@keyframes arrowBounce{
+  0%,100%{transform:translateX(0)}
+  50%{transform:translateX(5px)}
+}
+@keyframes goldPulse{
+  0%,100%{box-shadow:0 0 30px rgba(255,215,0,0.4),0 0 80px rgba(255,215,0,0.15),inset 0 1px 0 rgba(255,255,255,0.35)}
+  50%{box-shadow:0 0 50px rgba(255,215,0,0.6),0 0 120px rgba(255,215,0,0.3),inset 0 1px 0 rgba(255,255,255,0.4)}
+}
+
+.cta-sub{
+  text-align:center;margin-top:12px;
+  font-size:12px;font-weight:500;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.cta-sub-dot{width:4px;height:4px;border-radius:50%;background:rgba(107,125,179,0.5)}
+
+/* Recent win flash */
+.win-flash{
+  margin-top:16px;
+  width:100%;
+  border-radius:14px;
+  background:rgba(0,255,163,0.06);
+  border:1px solid rgba(0,255,163,0.15);
+  padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;
+  animation:winFlashIn 0.4s ease;
+  overflow:hidden;
+}
+.win-flash-icon{font-size:18px}
+.win-flash-text{color:var(--muted);flex:1;font-family:var(--font-mono);font-size:12px}
+.win-flash-text strong{color:var(--green)}
+@keyframes winFlashIn{
+  from{opacity:0;transform:translateX(16px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* Disclaimer */
+.disclaimer{
+  margin-top:44px;
+  font-size:11px;color:rgba(107,125,179,0.4);
+  text-align:center;line-height:1.8;padding:0 20px;
+}
+
+/* ── Animations ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<div class="orb orb-gold"></div>
+<div class="orb orb-green"></div>
+<div class="orb orb-red"></div>
+
+<main class="page">
+
+  <!-- 1. LIVE Badge -->
+  <div class="live-badge">
+    <span class="live-dot"></span>
+    LIVE — Players Winning Now
+  </div>
+
+  <!-- 2. Ticker -->
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- 3. Coin -->
+  <div class="coin-stage">
+    <div class="coin-glow"></div>
+    <div class="coin-ring"></div>
+    <div class="coin-ring2"></div>
+    <div class="coin" id="coin" title="Click to flip!">🪙</div>
+  </div>
+
+  <div class="content">
+
+    <!-- 4. Headline -->
+    <h1 class="headline">1000s Are Flipping SOL Right Now</h1>
+    <p class="sub">Double your SOL in seconds — on-chain, instant, provably fair.</p>
+
+    <!-- Live player counter -->
+    <div class="player-bar">
+      <div class="player-dot"></div>
+      <div class="player-text">
+        <span class="player-count" id="playerCount">881</span> players flipping live
+      </div>
+    </div>
+
+    <!-- 5. Payout box -->
+    <div class="payout-box">
+      <div class="payout-row">
+        <div class="payout-side">
+          <div class="payout-label">You Bet</div>
+          <div class="payout-amount">0.1</div>
+          <div class="payout-unit">SOL</div>
+        </div>
+        <div class="arrow-wrap">
+          <div class="arrow-line"></div>
+          <div class="arrow-head">▶</div>
+          <div class="arrow-line"></div>
+        </div>
+        <div class="payout-side">
+          <div class="payout-label">You Win</div>
+          <div class="payout-amount win">0.192</div>
+          <div class="payout-unit">SOL</div>
+        </div>
+      </div>
+      <div class="multiplier-tag">
+        ⚡ <span class="mult-val">1.92x</span> instant payout — paid to your wallet
+      </div>
+    </div>
+
+    <!-- 6. CTA -->
+    <div class="cta-wrap">
+      <a
+        href="https://solflip.live"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="cta-btn"
+        id="ctaBtn"
+        onclick="trackCTA()"
+      >
+        JOIN &amp; FLIP NOW <span class="cta-arrow">→</span>
+      </a>
+      <div class="cta-sub">
+        <span>Phantom Wallet</span>
+        <span class="cta-sub-dot"></span>
+        <span>No Signup</span>
+        <span class="cta-sub-dot"></span>
+        <span>Instant Payout</span>
+      </div>
+    </div>
+
+    <!-- Recent win flash (below CTA) -->
+    <div class="win-flash" id="winFlash">
+      <div class="win-flash-icon">🏆</div>
+      <div class="win-flash-text" id="winFlashText">
+        <strong>Loading...</strong>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="disclaimer">
+    18+ only · Gambling involves risk · Play responsibly<br/>
+    SolFlip is not responsible for any financial losses.
+  </div>
+
+</main>
+
+<script>
+/* ──────────────────────────────────────────────
+   DATA
+────────────────────────────────────────────── */
+const adjectives = ['Crypto','Sol','Moon','Degen','Whale','Alpha','Flip','HODLer','Based','Ape','Sigma','Bull'];
+const nouns      = ['King','Wizard','Beast','Shark','Tiger','Ghost','Legend','Rider','God','Wolf'];
+const amounts    = [0.019, 0.038, 0.057, 0.096, 0.115, 0.192, 0.384, 0.768, 0.023, 0.046];
+const sides      = ['HEADS','TAILS'];
+
+function randItem(arr){ return arr[Math.floor(Math.random()*arr.length)] }
+
+function randWallet(){
+  const chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let s='';
+  for(let i=0;i<4;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  s+='...';
+  for(let i=0;i<3;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+
+function randName(){
+  if(Math.random()>0.5) return randAdjNoun();
+  return randWallet();
+}
+
+function randAdjNoun(){
+  return randItem(adjectives)+randItem(nouns);
+}
+
+function makeEntry(){
+  const side   = randItem(sides);
+  const amount = randItem(amounts);
+  const name   = randName();
+  return { name, side, amount };
+}
+
+/* ──────────────────────────────────────────────
+   TICKER
+────────────────────────────────────────────── */
+function buildTickerItem(e){
+  const sideClass = e.side==='HEADS' ? 'side-heads' : 'side-tails';
+  return `<span class="ticker-item">
+    <span class="wallet">${e.name}</span>
+    won <span class="amount">+${e.amount.toFixed(3)} SOL</span>
+    on <span class="${sideClass}">${e.side}</span> 🏆
+  </span>`;
+}
+
+function buildTicker(){
+  const track = document.getElementById('tickerTrack');
+  // Generate 18 entries, duplicate for seamless loop
+  let items = [];
+  for(let i=0;i<18;i++) items.push(makeEntry());
+  const html = items.map(buildTickerItem).join('') +
+               items.map(buildTickerItem).join('');  // duplicate
+  track.innerHTML = html;
+}
+
+// Refresh ticker every 10s with new data (seamless)
+buildTicker();
+setInterval(buildTicker, 10000);
+
+/* ──────────────────────────────────────────────
+   WIN FLASH (bottom of page)
+────────────────────────────────────────────── */
+function refreshWinFlash(){
+  const e    = makeEntry();
+  const el   = document.getElementById('winFlash');
+  const txt  = document.getElementById('winFlashText');
+  const verb = Math.random() > 0.5 ? 'just won' : 'cashed out';
+  txt.innerHTML = `<strong>${e.name}</strong> ${verb} <strong>+${e.amount.toFixed(3)} SOL</strong> on ${e.side} 🏆`;
+  // Replay animation
+  el.style.animation='none';
+  void el.offsetWidth;
+  el.style.animation='winFlashIn 0.4s ease';
+}
+
+refreshWinFlash();
+setInterval(refreshWinFlash, 2000);
+
+/* ──────────────────────────────────────────────
+   PLAYER COUNT  (updates every 5s, 847–923)
+────────────────────────────────────────────── */
+function refreshPlayerCount(){
+  const count = Math.floor(Math.random()*(923-847+1))+847;
+  const el = document.getElementById('playerCount');
+  el.style.transition='opacity 0.3s';
+  el.style.opacity='0';
+  setTimeout(()=>{
+    el.textContent = count.toLocaleString();
+    el.style.opacity='1';
+  },300);
+}
+
+refreshPlayerCount();
+setInterval(refreshPlayerCount, 5000);
+
+/* ──────────────────────────────────────────────
+   COIN CLICK
+────────────────────────────────────────────── */
+const coin = document.getElementById('coin');
+coin.addEventListener('click',function(){
+  this.style.animation='none';
+  void this.offsetWidth;
+  this.style.animation='coinFlip 1s cubic-bezier(0.4,0,0.2,1) both, coinFloat 4s 1s ease-in-out infinite alternate';
+});
+
+/* ──────────────────────────────────────────────
+   GTAG CTA TRACKING
+────────────────────────────────────────────── */
+function trackCTA(){
+  if(typeof gtag==='function'){
+    gtag('event','cta_click',{
+      event_category:'engagement',
+      event_label:'join_flip_now',
+      value:1
+    });
+  }
+}
+</script>
+
+<!-- Replace with real GA4 ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments)}
+  gtag('js',new Date());
+  gtag('config','G-XXXXXXXXXX');
+</script>
+
+</body>
+</html>

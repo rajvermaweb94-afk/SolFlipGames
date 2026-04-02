@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SolFlip — Flip SOL. Win Instantly.</title>
+  <meta name="description" content="The simplest crypto coin flip game on Solana. Connect Phantom, pick Heads or Tails, win 1.92x instantly." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- gtag stub (replace UA with real ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #06091f;
+      --navy2:  #0a0f2e;
+      --navy3:  #0e1440;
+      --gold:   #FFD700;
+      --gold2:  #FFC200;
+      --green:  #00FFA3;
+      --green2: #00d488;
+      --white:  #f0f4ff;
+      --muted:  #8892b0;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--navy);
+      color: var(--white);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Starfield background ──────────────────────────────────── */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .stars span {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle var(--d, 3s) var(--delay, 0s) ease-in-out infinite alternate;
+      opacity: 0;
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: var(--op, 0.6); transform: scale(1.2); }
+    }
+
+    /* ─── Glow blob ─────────────────────────────────────────────── */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-gold {
+      width: 340px; height: 340px;
+      background: rgba(255,215,0,0.08);
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      animation: blobPulse 6s ease-in-out infinite alternate;
+    }
+    .blob-green {
+      width: 260px; height: 260px;
+      background: rgba(0,255,163,0.07);
+      bottom: 60px; right: -60px;
+      animation: blobPulse 8s 1s ease-in-out infinite alternate;
+    }
+    @keyframes blobPulse {
+      from { transform: translateX(-50%) scale(1); opacity: 0.7; }
+      to   { transform: translateX(-50%) scale(1.25); opacity: 1; }
+    }
+    .blob-green { animation: blobPulse2 8s 1s ease-in-out infinite alternate; }
+    @keyframes blobPulse2 {
+      from { transform: scale(1); opacity: 0.6; }
+      to   { transform: scale(1.3); opacity: 1; }
+    }
+
+    /* ─── Page wrapper ──────────────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 64px;
+      max-width: 480px;
+      margin: 0 auto;
+      gap: 0;
+    }
+
+    /* ─── Logo ──────────────────────────────────────────────────── */
+    .logo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      animation: fadeDown 0.6s ease both;
+    }
+    .coin-icon {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--gold), var(--gold2), #fff8c0, var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 28px rgba(255,215,0,0.55), 0 0 60px rgba(255,215,0,0.2);
+      animation: coinSpin 0.9s cubic-bezier(0.34,1.56,0.64,1) both,
+                 coinFloat 4s 1s ease-in-out infinite alternate;
+    }
+    @keyframes coinSpin {
+      from { transform: rotateY(90deg) scale(0.6); opacity: 0; }
+      to   { transform: rotateY(0deg) scale(1);   opacity: 1; }
+    }
+    @keyframes coinFloat {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-8px); }
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 18vw, 80px);
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.2);
+      line-height: 1;
+      animation: fadeDown 0.7s 0.1s ease both;
+    }
+
+    .logo-badge {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--green);
+      opacity: 0.85;
+      animation: fadeDown 0.7s 0.2s ease both;
+    }
+
+    /* ─── Divider ───────────────────────────────────────────────── */
+    .divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,215,0,0.25), transparent);
+      margin: 36px 0;
+      animation: fadeIn 0.8s 0.4s ease both;
+    }
+
+    /* ─── Headline block ────────────────────────────────────────── */
+    .headline-block {
+      text-align: center;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .headline {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 11vw, 58px);
+      line-height: 1.05;
+      letter-spacing: 1.5px;
+      background: linear-gradient(135deg, #fff 30%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .subtext {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    /* ─── Steps section ─────────────────────────────────────────── */
+    .steps-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.6;
+      margin: 44px 0 20px;
+      animation: fadeIn 0.7s 0.5s ease both;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      animation: fadeUp 0.7s 0.55s ease both;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,215,0,0.1);
+      border-radius: 16px;
+      padding: 18px 20px;
+      transition: border-color 0.25s, background 0.25s, transform 0.2s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+    .step::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,215,0,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+      border-radius: inherit;
+    }
+    .step:hover {
+      border-color: rgba(255,215,0,0.3);
+      background: rgba(255,255,255,0.05);
+      transform: translateX(3px);
+    }
+    .step:hover::before { opacity: 1; }
+
+    .step-num {
+      min-width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+      border: 1px solid rgba(255,215,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .step-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .step-body { flex: 1; }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 3px;
+    }
+    .step-desc {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .step-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .badge-green {
+      background: rgba(0,255,163,0.1);
+      color: var(--green);
+      border: 1px solid rgba(0,255,163,0.2);
+    }
+
+    /* ─── CTA ───────────────────────────────────────────────────── */
+    .cta-wrap {
+      margin-top: 44px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      animation: fadeUp 0.7s 0.7s ease both;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      width: 100%;
+      max-width: 360px;
+      padding: 20px 36px;
+      border-radius: 16px;
+      background: var(--green);
+      color: #021a0d;
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 3px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 400;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 30px rgba(0,255,163,0.45),
+        0 0 80px rgba(0,255,163,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s;
+      cursor: pointer;
+      animation: greenPulse 2.5s 1.2s ease-in-out infinite;
+    }
+    .cta-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow:
+        0 0 50px rgba(0,255,163,0.65),
+        0 0 120px rgba(0,255,163,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.3);
+      background: #00ffb0;
+    }
+    .cta-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    @keyframes greenPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(0,255,163,0.45), 0 0 80px rgba(0,255,163,0.15), inset 0 1px 0 rgba(255,255,255,0.25); }
+      50%       { box-shadow: 0 0 50px rgba(0,255,163,0.65), 0 0 120px rgba(0,255,163,0.3), inset 0 1px 0 rgba(255,255,255,0.3); }
+    }
+
+    /* ─── Trust line ────────────────────────────────────────────── */
+    .trust {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.3px;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .trust-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    /* ─── Footer disclaimer ─────────────────────────────────────── */
+    .disclaimer {
+      margin-top: 52px;
+      font-size: 11px;
+      color: rgba(136,146,176,0.45);
+      text-align: center;
+      line-height: 1.7;
+      animation: fadeIn 1s 1s ease both;
+    }
+
+    /* ─── Animations ────────────────────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ─── Scanline overlay ──────────────────────────────────────── */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.03) 3px,
+        rgba(0,0,0,0.03) 4px
+      );
+    }
+  </style>
+</head>
+<body>
+
+<!-- Scanlines -->
+<div class="scanlines"></div>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Glow blobs -->
+<div class="blob blob-gold"></div>
+<div class="blob blob-green"></div>
+
+<!-- ─── Main page ─────────────────────────────── -->
+<main class="page">
+
+  <!-- 1. Logo -->
+  <div class="logo-wrap">
+    <div class="coin-icon">🪙</div>
+    <div class="logo-text">SOLFLIP</div>
+    <div class="logo-badge">Solana Coin Flip</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 2 & 3. Headline + Subtext -->
+  <div class="headline-block">
+    <h1 class="headline">Flip SOL.<br>Win 1.92x<br>Instantly.</h1>
+    <p class="subtext">The simplest crypto game on Solana</p>
+  </div>
+
+  <!-- 4. How It Works -->
+  <div class="steps-label">How It Works</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">👻</div>
+      <div class="step-body">
+        <div class="step-title">Connect Phantom Wallet</div>
+        <div class="step-desc">One tap. No signup. No KYC.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">🪙</div>
+      <div class="step-body">
+        <div class="step-title">Pick Heads or Tails</div>
+        <div class="step-desc">Choose your side and set your wager.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">⚡</div>
+      <div class="step-body">
+        <div class="step-title">Win 1.92x Instantly</div>
+        <div class="step-desc">Payout hits your wallet in seconds.</div>
+      </div>
+      <span class="step-badge badge-green">Instant</span>
+    </div>
+  </div>
+
+  <!-- 5 & 6. CTA + Trust -->
+  <div class="cta-wrap">
+    <a
+      class="cta-btn"
+      href="https://solflip.live"
+      target="_blank"
+      rel="noopener noreferrer"
+      id="cta-flip-now"
+      onclick="trackFlipNow(event)"
+    >
+      FLIP NOW →
+    </a>
+
+    <div class="trust">
+      <span class="trust-item"><span class="trust-dot"></span>Powered by Solana</span>
+      <span class="trust-item"><span class="trust-dot"></span>Instant Payout</span>
+      <span class="trust-item"><span class="trust-dot"></span>Provably Fair</span>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <p class="disclaimer">
+    18+ only. Gambling involves risk. Play responsibly.<br>
+    SolFlip is not responsible for any financial losses incurred.
+  </p>
+
+</main>
+
+<script>
+  /* ── Starfield ── */
+  (function() {
+    const container = document.getElementById('stars');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('span');
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const size = Math.random() * 2 + 1;
+      const delay = (Math.random() * 5).toFixed(2);
+      const dur   = (Math.random() * 4 + 2).toFixed(2);
+      const op    = (Math.random() * 0.5 + 0.15).toFixed(2);
+      s.style.cssText = `
+        left:${x}%; top:${y}%;
+        width:${size}px; height:${size}px;
+        --d:${dur}s; --delay:${delay}s; --op:${op};
+      `;
+      container.appendChild(s);
+    }
+  })();
+
+  /* ── gtag CTA tracking ── */
+  function trackFlipNow(e) {
+    if (typeof gtag === 'function') {
+      gtag('event', 'cta_click', {
+        event_category: 'engagement',
+        event_label: 'flip_now_button',
+        value: 1
+      });
+    }
+  }
+
+  /* ── Coin icon: click to spin ── */
+  const coin = document.querySelector('.coin-icon');
+  coin.addEventListener('click', function() {
+    this.style.animation = 'none';
+    void this.offsetWidth; // reflow
+    this.style.animation = 'coinSpin 0.7s cubic-bezier(0.34,1.56,0.64,1) both, coinFloat 4s 0.7s ease-in-out infinite alternate';
+  });
+</script>
+
+</body>
+</html>

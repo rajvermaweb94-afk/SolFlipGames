@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SolFlip — Limited Bonus Active</title>
+<meta name="description" content="Limited time bonus on SolFlip. Win 1.92x your SOL instantly. Offer ends soon."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:       #0a0202;
+  --bg2:      #110404;
+  --bg3:      #180606;
+  --red:      #e01010;
+  --red2:     #ff2020;
+  --red3:     #ff4444;
+  --red-dim:  #3d0a0a;
+  --gold:     #FFD700;
+  --gold2:    #FFC107;
+  --gold3:    #ffe566;
+  --gold-dim: #3d2f00;
+  --white:    #fff5f5;
+  --muted:    #7a5050;
+  --border-r: rgba(224,16,16,0.25);
+  --border-g: rgba(255,215,0,0.2);
+  --font-head:'Oswald', sans-serif;
+  --font-cond:'Barlow Condensed', sans-serif;
+  --font-body:'Barlow', sans-serif;
+  --font-mono:'Share Tech Mono', monospace;
+}
+
+html,body{width:100%;min-height:100vh;overflow-x:hidden}
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Vignette + noise ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(180,10,10,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 50% 100%,  rgba(255,215,0,0.05) 0%, transparent 65%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, transparent 60%, rgba(0,0,0,0.7) 100%);
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(180,10,10,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(180,10,10,0.04) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+
+/* ── Page ── */
+.page{
+  position:relative;z-index:1;
+  max-width:460px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:center;
+  padding-bottom:60px;
+}
+
+/* ══════════════════════════════════════
+   1. ALERT BAR
+══════════════════════════════════════ */
+.alert-bar{
+  width:100%;
+  background:linear-gradient(90deg,#6b0000,var(--red),#6b0000);
+  padding:11px 16px;
+  text-align:center;
+  position:relative;overflow:hidden;
+  border-bottom:2px solid rgba(255,80,80,0.4);
+}
+/* animated sweep */
+.alert-bar::after{
+  content:'';
+  position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
+  animation:sweep 2.5s ease-in-out infinite;
+}
+@keyframes sweep{from{left:-60%}to{left:120%}}
+
+.alert-text{
+  font-family:var(--font-cond);
+  font-size:clamp(13px,4vw,15px);
+  font-weight:700;
+  letter-spacing:2px;
+  color:#fff;
+  text-shadow:0 0 12px rgba(255,100,100,0.8);
+  position:relative;z-index:1;
+}
+
+/* ══════════════════════════════════════
+   2. COUNTDOWN
+══════════════════════════════════════ */
+.countdown-wrap{
+  width:100%;
+  padding:28px 20px 24px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;
+  border-bottom:1px solid rgba(255,215,0,0.08);
+  animation:fadeDown 0.5s ease both;
+}
+
+.countdown-label{
+  font-family:var(--font-mono);
+  font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+
+.countdown-display{
+  display:flex;align-items:center;gap:6px;
+}
+
+.cd-block{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+
+.cd-num{
+  font-family:var(--font-mono);
+  font-size:clamp(44px,16vw,72px);
+  font-weight:400;
+  line-height:1;
+  color:var(--gold);
+  text-shadow:
+    0 0 20px rgba(255,215,0,0.7),
+    0 0 50px rgba(255,215,0,0.3),
+    0 0 100px rgba(255,215,0,0.1);
+  background:
+    linear-gradient(180deg,var(--gold3) 0%,var(--gold) 50%,var(--gold2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  min-width:2ch;text-align:center;
+  transition:transform 0.1s ease;
+  display:block;
+}
+.cd-num.tick{
+  animation:numTick 0.15s ease;
+}
+@keyframes numTick{
+  0%  {transform:translateY(-6px);opacity:0.6}
+  100%{transform:translateY(0);  opacity:1}
+}
+
+.cd-sub{
+  font-family:var(--font-mono);
+  font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(255,215,0,0.35);
+}
+
+.cd-sep{
+  font-family:var(--font-mono);
+  font-size:clamp(36px,12vw,58px);
+  color:rgba(255,215,0,0.4);
+  line-height:1;
+  padding-bottom:14px;
+  animation:sepBlink 1s step-end infinite;
+}
+@keyframes sepBlink{0%,100%{opacity:1}50%{opacity:0.15}}
+
+/* Urgency bar below timer */
+.urgency-fill-wrap{
+  width:100%;
+  background:rgba(255,215,0,0.07);
+  border-radius:4px;height:4px;
+  overflow:hidden;
+  margin-top:4px;
+}
+.urgency-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--gold2),var(--gold));
+  border-radius:4px;
+  box-shadow:0 0 8px rgba(255,215,0,0.5);
+  width:100%;
+  animation:urgencyDrain 7199s linear forwards;
+}
+@keyframes urgencyDrain{from{width:100%}to{width:0%}}
+
+/* ══════════════════════════════════════
+   3. HEADLINE
+══════════════════════════════════════ */
+.headline-block{
+  padding:28px 20px 0;
+  text-align:center;
+  animation:fadeUp 0.5s 0.1s ease both;
+}
+.kicker{
+  font-family:var(--font-mono);
+  font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--red3);
+  margin-bottom:10px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.kicker-line{width:24px;height:1px;background:var(--red3);opacity:0.5}
+
+.headline{
+  font-family:var(--font-cond);
+  font-size:clamp(38px,13vw,60px);
+  font-weight:800;
+  line-height:1.0;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.headline .hl-sol{
+  background:linear-gradient(135deg,var(--gold3),var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-shadow:none;
+}
+.headline .hl-flip{
+  color:var(--white);
+}
+.headline .hl-live{
+  color:var(--red2);
+  text-shadow:0 0 20px rgba(255,32,32,0.6);
+}
+
+/* ══════════════════════════════════════
+   5. COIN
+══════════════════════════════════════ */
+.coin-stage{
+  margin-top:28px;
+  position:relative;
+  width:110px;height:110px;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn 0.6s 0.2s ease both;
+}
+
+.coin-shadow{
+  position:absolute;
+  bottom:-14px;left:50%;transform:translateX(-50%);
+  width:80px;height:14px;
+  border-radius:50%;
+  background:rgba(255,215,0,0.18);
+  filter:blur(8px);
+  animation:shadowPulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes shadowPulse{from{opacity:0.4;width:70px}to{opacity:0.8;width:90px}}
+
+.coin{
+  width:100px;height:100px;
+  border-radius:50%;
+  position:relative;z-index:1;
+  transform-style:preserve-3d;
+  animation:coinSpin 3s ease-in-out infinite;
+  cursor:pointer;
+}
+.coin-face{
+  position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,
+    #7a5500 0deg,
+    #ffd700 40deg,
+    #fffde0 80deg,
+    #ffc200 120deg,
+    #b8860b 160deg,
+    #ffd700 200deg,
+    #fffde0 240deg,
+    #ffc200 280deg,
+    #7a5500 320deg,
+    #ffd700 360deg
+  );
+  box-shadow:
+    inset 0 4px 10px rgba(255,255,255,0.5),
+    inset 0 -4px 10px rgba(0,0,0,0.45),
+    0 0 0 5px rgba(255,215,0,0.2),
+    0 0 30px rgba(255,215,0,0.5),
+    0 0 70px rgba(255,215,0,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;
+  filter:drop-shadow(0 0 8px rgba(255,215,0,0.6));
+}
+.coin-rim{
+  position:absolute;inset:-3px;border-radius:50%;
+  border:3px solid rgba(255,215,0,0.35);
+  animation:rimGlow 2s ease-in-out infinite alternate;
+}
+@keyframes rimGlow{
+  from{box-shadow:0 0 10px rgba(255,215,0,0.3)}
+  to  {box-shadow:0 0 28px rgba(255,215,0,0.7),0 0 60px rgba(255,215,0,0.2)}
+}
+
+@keyframes coinSpin{
+  0%  {transform:rotateY(0deg)}
+  40% {transform:rotateY(180deg)}
+  50% {transform:rotateY(180deg)}
+  90% {transform:rotateY(360deg)}
+  100%{transform:rotateY(360deg)}
+}
+
+/* rings */
+.ring{
+  position:absolute;border-radius:50%;
+  border:1.5px solid rgba(255,215,0,0.25);
+  animation:ringExp 2.4s ease-out infinite;
+}
+.ring:nth-child(1){width:100px;height:100px}
+.ring:nth-child(2){width:100px;height:100px;animation-delay:0.8s}
+.ring:nth-child(3){width:100px;height:100px;animation-delay:1.6s}
+@keyframes ringExp{
+  0%  {transform:scale(1);opacity:0.8}
+  100%{transform:scale(1.9);opacity:0}
+}
+
+/* ══════════════════════════════════════
+   4. OFFER BOX
+══════════════════════════════════════ */
+.offer-box{
+  margin:28px 16px 0;
+  width:calc(100% - 32px);
+  border-radius:20px;
+  padding:24px 22px;
+  background:linear-gradient(145deg,rgba(255,215,0,0.05),rgba(180,10,10,0.06));
+  border:1px solid rgba(255,215,0,0.22);
+  position:relative;overflow:hidden;
+  animation:fadeUp 0.5s 0.25s ease both;
+  box-shadow:
+    0 0 30px rgba(255,215,0,0.08),
+    0 0 80px rgba(180,10,10,0.06),
+    inset 0 1px 0 rgba(255,215,0,0.15);
+}
+/* top glow line */
+.offer-box::before{
+  content:'';
+  position:absolute;top:-1px;left:10%;right:10%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  border-radius:2px;
+}
+/* corner badge */
+.offer-box::after{
+  content:'EXCLUSIVE';
+  position:absolute;top:14px;right:-22px;
+  background:var(--red);
+  color:#fff;
+  font-family:var(--font-mono);
+  font-size:9px;letter-spacing:1.5px;
+  padding:3px 28px;
+  transform:rotate(35deg);
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+
+.offer-row{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,215,0,0.07);
+}
+.offer-row:last-child{border-bottom:none}
+.offer-icon{
+  font-size:22px;flex-shrink:0;padding-top:1px;
+  filter:drop-shadow(0 0 6px rgba(255,215,0,0.5));
+}
+.offer-text-wrap{}
+.offer-main{
+  font-family:var(--font-cond);
+  font-size:clamp(18px,5.5vw,22px);
+  font-weight:700;
+  letter-spacing:0.5px;
+  color:var(--white);
+  line-height:1.15;
+}
+.offer-main .gold{color:var(--gold);text-shadow:0 0 12px rgba(255,215,0,0.4)}
+.offer-sub{
+  font-size:12px;color:var(--muted);margin-top:3px;
+  font-weight:500;letter-spacing:0.3px;
+}
+
+/* ══════════════════════════════════════
+   6. CTA BUTTON
+══════════════════════════════════════ */
+.cta-wrap{
+  margin-top:28px;
+  width:calc(100% - 32px);
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+  animation:fadeUp 0.5s 0.35s ease both;
+}
+
+.cta-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;
+  padding:22px 20px;
+  border-radius:16px;
+  text-decoration:none;
+  font-family:var(--font-cond);
+  font-size:clamp(20px,6.5vw,26px);
+  font-weight:800;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:#fff;
+  background:linear-gradient(145deg,#8b0000,var(--red),#cc0000);
+  position:relative;overflow:hidden;
+  box-shadow:
+    0 0 30px rgba(224,16,16,0.5),
+    0 0 80px rgba(224,16,16,0.2),
+    0 4px 24px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,150,150,0.25);
+  transition:transform 0.18s,box-shadow 0.18s;
+  animation:redPulse 1.8s ease-in-out infinite;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.cta-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 50%);
+  pointer-events:none;
+}
+/* sweep */
+.cta-btn::after{
+  content:'';
+  position:absolute;top:0;left:-100%;
+  width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  animation:btnSweep 2s ease-in-out infinite;
+}
+@keyframes btnSweep{from{left:-60%}to{left:120%}}
+
+.cta-btn:hover{
+  transform:translateY(-3px) scale(1.02);
+  box-shadow:0 0 50px rgba(255,32,32,0.7),0 0 120px rgba(224,16,16,0.3),0 8px 32px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,150,150,0.3);
+}
+.cta-btn:active{transform:translateY(0) scale(0.98)}
+
+@keyframes redPulse{
+  0%,100%{box-shadow:0 0 30px rgba(224,16,16,0.5),0 0 80px rgba(224,16,16,0.2),0 4px 24px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,150,150,0.25)}
+  50%    {box-shadow:0 0 55px rgba(255,32,32,0.75),0 0 130px rgba(224,16,16,0.35),0 4px 24px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,150,150,0.3)}
+}
+
+/* 7. Expiry note */
+.expiry-note{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:rgba(255,215,0,0.5);
+  letter-spacing:0.5px;
+}
+.expiry-icon{animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:0.5}to{opacity:1}}
+
+/* ══════════════════════════════════════
+   8. LIVE COUNTER
+══════════════════════════════════════ */
+.live-counter{
+  margin-top:24px;
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(0,255,100,0.15);
+  border-radius:40px;
+  padding:10px 22px;
+  animation:fadeIn 0.6s 0.4s ease both;
+}
+.green-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:#00ff88;
+  box-shadow:0 0 6px #00ff88,0 0 14px rgba(0,255,136,0.4);
+  flex-shrink:0;
+  animation:greenBlink 1.1s ease-in-out infinite;
+}
+@keyframes greenBlink{
+  0%,100%{box-shadow:0 0 5px #00ff88,0 0 12px rgba(0,255,136,0.3)}
+  50%    {box-shadow:0 0 12px #00ff88,0 0 26px rgba(0,255,136,0.6)}
+}
+.live-text{
+  font-family:var(--font-mono);font-size:13px;
+  color:rgba(255,255,255,0.6);
+  white-space:nowrap;
+}
+.live-num{
+  color:#00ff88;font-weight:700;
+  transition:opacity 0.3s;
+  display:inline-block;
+}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+.footer-strip{
+  margin:32px 16px 0;
+  width:calc(100%-32px);
+  display:flex;justify-content:center;
+  flex-wrap:wrap;gap:0;
+}
+.footer-item{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;
+  color:var(--muted);
+  padding:0 16px;
+  border-right:1px solid rgba(255,255,255,0.07);
+}
+.footer-item:last-child{border-right:none}
+.f-icon{font-size:12px}
+
+.disclaimer{
+  margin-top:24px;
+  font-size:11px;color:rgba(100,60,60,0.45);
+  text-align:center;line-height:1.9;padding:0 24px;
+}
+
+/* ── Anims ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp  {from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn  {from{opacity:0}                            to{opacity:1}}
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <!-- 1. Alert bar -->
+  <div class="alert-bar">
+    <div class="alert-text">⚠️&nbsp; LIMITED BONUS ACTIVE — ENDS SOON &nbsp;⚠️</div>
+  </div>
+
+  <!-- 2. Countdown -->
+  <div class="countdown-wrap">
+    <div class="countdown-label">Offer expires in</div>
+    <div class="countdown-display">
+      <div class="cd-block">
+        <span class="cd-num" id="cdH">01</span>
+        <span class="cd-sub">HRS</span>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block">
+        <span class="cd-num" id="cdM">59</span>
+        <span class="cd-sub">MIN</span>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block">
+        <span class="cd-num" id="cdS">59</span>
+        <span class="cd-sub">SEC</span>
+      </div>
+    </div>
+    <!-- burn bar -->
+    <div class="urgency-fill-wrap" style="width:calc(100% - 0px)">
+      <div class="urgency-fill" id="burnBar"></div>
+    </div>
+  </div>
+
+  <!-- 3. Headline -->
+  <div class="headline-block">
+    <div class="kicker">
+      <div class="kicker-line"></div>
+      LIVE ON SOLANA
+      <div class="kicker-line"></div>
+    </div>
+    <h1 class="headline">
+      <span class="hl-sol">SOL</span>
+      <span class="hl-flip"> FLIP</span><br/>
+      <span class="hl-live">IS LIVE</span>
+      <span class="hl-flip"> NOW</span>
+    </h1>
+  </div>
+
+  <!-- 5. Coin -->
+  <div class="coin-stage">
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="coin" id="mainCoin" title="Click to spin!">
+      <div class="coin-face">⚡</div>
+      <div class="coin-rim"></div>
+    </div>
+    <div class="coin-shadow"></div>
+  </div>
+
+  <!-- 4. Offer box -->
+  <div class="offer-box">
+    <div class="offer-row">
+      <div class="offer-icon">🎯</div>
+      <div class="offer-text-wrap">
+        <div class="offer-main">Play Now &amp; Win <span class="gold">1.92×</span> Your SOL</div>
+        <div class="offer-sub">Every flip, every time — no limits on winnings</div>
+      </div>
+    </div>
+    <div class="offer-row">
+      <div class="offer-icon">⚡</div>
+      <div class="offer-text-wrap">
+        <div class="offer-main">Instant Payout</div>
+        <div class="offer-sub">Wins hit your wallet in under a second</div>
+      </div>
+    </div>
+    <div class="offer-row">
+      <div class="offer-icon">🔒</div>
+      <div class="offer-text-wrap">
+        <div class="offer-main">Provably Fair on Solana</div>
+        <div class="offer-sub">On-chain randomness — verify every result yourself</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 & 7. CTA + expiry -->
+  <div class="cta-wrap">
+    <a href="https://solflip.live" target="_blank" rel="noopener noreferrer"
+       class="cta-btn" id="ctaBtn" onclick="trackCTA()">
+      ▶&nbsp; CLAIM YOUR FLIP NOW
+    </a>
+    <div class="expiry-note">
+      <span class="expiry-icon">⏳</span>
+      Offer expires when timer hits zero
+    </div>
+  </div>
+
+  <!-- 8. Live counter -->
+  <div class="live-counter">
+    <div class="green-dot"></div>
+    <div class="live-text">
+      <span class="live-num" id="liveNum">847</span> players flipping right now
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-strip">
+    <div class="footer-item"><span class="f-icon">⚡</span>Instant Payout</div>
+    <div class="footer-item"><span class="f-icon">🔒</span>No KYC</div>
+    <div class="footer-item"><span class="f-icon">◎</span>Solana</div>
+  </div>
+
+  <div class="disclaimer">
+    18+ only · Gambling involves financial risk<br/>
+    Play responsibly · SolFlip.live
+  </div>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════
+   COUNTDOWN — starts at 01:59:59, loops
+══════════════════════════════════════ */
+(function(){
+  const TOTAL  = 2 * 3600 - 1; // 01:59:59 in seconds
+  let   remain = TOTAL;
+
+  const elH = document.getElementById('cdH');
+  const elM = document.getElementById('cdM');
+  const elS = document.getElementById('cdS');
+  const bar = document.getElementById('burnBar');
+
+  let prevH = '', prevM = '', prevS = '';
+
+  function pad(n){ return String(n).padStart(2,'0') }
+
+  function tick(){
+    if(remain < 0){ remain = TOTAL } // loop
+
+    const h = Math.floor(remain / 3600);
+    const m = Math.floor((remain % 3600) / 60);
+    const s = remain % 60;
+
+    const sh = pad(h), sm = pad(m), ss = pad(s);
+
+    if(sh !== prevH){ elH.textContent = sh; flash(elH); prevH = sh }
+    if(sm !== prevM){ elM.textContent = sm; flash(elM); prevM = sm }
+    if(ss !== prevS){ elS.textContent = ss; flash(elS); prevS = ss }
+
+    // burn bar (only shrinks on real time — CSS handles the animation)
+    remain--;
+  }
+
+  function flash(el){
+    el.classList.remove('tick');
+    void el.offsetWidth;
+    el.classList.add('tick');
+  }
+
+  tick(); // immediate first render
+  setInterval(tick, 1000);
+})();
+
+/* ══════════════════════════════════════
+   LIVE PLAYER COUNT  600–900, every 6s
+══════════════════════════════════════ */
+(function(){
+  const el = document.getElementById('liveNum');
+  function refresh(){
+    const n = Math.floor(Math.random()*(900-600+1))+600;
+    el.style.opacity='0';
+    setTimeout(()=>{
+      el.textContent = n.toLocaleString();
+      el.style.opacity='1';
+    },300);
+  }
+  setInterval(refresh, 6000);
+})();
+
+/* ══════════════════════════════════════
+   COIN CLICK
+══════════════════════════════════════ */
+document.getElementById('mainCoin').addEventListener('click',function(){
+  this.style.animation='none';
+  void this.offsetWidth;
+  this.style.animation='coinSpin 1s ease-in-out both';
+  setTimeout(()=>{
+    this.style.animation='coinSpin 3s ease-in-out infinite';
+  },1000);
+});
+
+/* ══════════════════════════════════════
+   GTAG
+══════════════════════════════════════ */
+function trackCTA(){
+  if(typeof gtag==='function'){
+    gtag('event','cta_click',{
+      event_category:'engagement',
+      event_label:'claim_flip',
+      value:1
+    });
+  }
+}
+</script>
+
+<!-- Replace G-XXXXXXXXXX with real GA4 ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments)}
+  gtag('js',new Date());
+  gtag('config','G-XXXXXXXXXX');
+</script>
+
+</body>
+</html>
