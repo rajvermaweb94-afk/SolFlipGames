@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D8XZT2S3GN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-D8XZT2S3GN');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SOLFLIP — Heads or Tails on Solana</title>
@@ -3400,12 +3391,21 @@ async function fetchLiveFlips() {
     // ── Ticker strip: always render from server (most up-to-date global view) ──
     // If local player has flipped, their flips are already in tickerFlips;
     // we use server data to populate any missing entries for unconnected visitors.
-    const serverTickerItems = flips.slice(0, 20).map(f => ({
-      won: f.playerWon,
-      delta: f.playerWon ? (f.payoutSol - f.betSol) : (-f.betSol),
-      addr: f.playerPubkey || '???',
-      bet: f.betSol,
-    }));
+    const serverTickerItems = flips.slice(0, 20).map(f => {
+      const betSol    = parseFloat(f.betSol)    || 0;
+      const payoutSol = parseFloat(f.payoutSol) || 0;
+      // delta = net profit (win) or net loss (loss)
+      const delta = f.playerWon
+        ? (payoutSol > 0 ? payoutSol - betSol : betSol * 0.92)
+        : -betSol;
+      return {
+        won: f.playerWon,
+        delta,
+        payoutSol: payoutSol > 0 ? payoutSol : betSol * 1.92,
+        addr: f.playerPubkey || '???',
+        bet: betSol,
+      };
+    });
     renderTickerFromServer(serverTickerItems);
 
     // ── H&T strip: always update from server unless local player has recent flips ──
@@ -3426,10 +3426,15 @@ function renderTickerFromServer(items) {
   if (tickerFlips.length) return;
   const html = items.map(f => {
     const valClass = f.won ? 'ticker-win' : 'ticker-loss';
-    const delta = typeof f.delta === 'number' ? f.delta : 0;
-    const valText = f.won
-      ? '+' + Math.abs(delta).toFixed(3) + ' SOL'
-      : delta.toFixed(3) + ' SOL';
+    const delta = (typeof f.delta === 'number' && isFinite(f.delta)) ? f.delta : 0;
+    // For wins: show +amount SOL (net profit). For losses: show -amount SOL
+    let valText;
+    if (f.won) {
+      const winAmt = Math.abs(delta);
+      valText = '+' + (winAmt > 0 ? winAmt.toFixed(4) : (parseFloat(f.bet) * 0.92).toFixed(4)) + ' SOL';
+    } else {
+      valText = '-' + Math.abs(delta).toFixed(4) + ' SOL';
+    }
     const addrRaw = f.addr || '???';
     // Shorten address: 4chars…4chars
     const addr = addrRaw.length > 12
@@ -3476,7 +3481,13 @@ function renderTicker() {
     const valClass = f.won ? 'ticker-win' : 'ticker-loss';
     // Guard against NaN — delta must be a valid finite number
     const safeD = (typeof f.delta === 'number' && isFinite(f.delta)) ? f.delta : 0;
-    const valText = f.won ? '+' + Math.abs(safeD).toFixed(3) + ' SOL' : safeD.toFixed(3) + ' SOL';
+    let valText;
+    if (f.won) {
+      const winAmt = Math.abs(safeD);
+      valText = '+' + (winAmt > 0 ? winAmt.toFixed(4) : (parseFloat(f.bet||0) * 0.92).toFixed(4)) + ' SOL';
+    } else {
+      valText = '-' + Math.abs(safeD).toFixed(4) + ' SOL';
+    }
     return `<span class="ticker-item"><span class="ticker-addr">${myAddr}</span><span class="${valClass}">${valText}</span></span><span class="ticker-sep">•</span>`;
   }).join('');
   track.innerHTML = items + items;
@@ -3571,10 +3582,11 @@ function getAC() {
   return _audioCtx;
 }
 
-let soundMuted = localStorage.getItem('sfSoundMuted') !== 'false'; // muted by default
+// Sound is ON by default — only muted if user explicitly set it to 'true'
+let soundMuted = localStorage.getItem('sfSoundMuted') === 'true';
 function toggleSound() {
   soundMuted = !soundMuted;
-  localStorage.setItem('sfSoundMuted', soundMuted);
+  localStorage.setItem('sfSoundMuted', soundMuted ? 'true' : 'false');
   if (!soundMuted) { playClickSound(); }
 }
 // Sound button removed from UI — state preserved via localStorage
@@ -3676,6 +3688,43 @@ function playWalletConnectSound() {
 // Hook click sounds onto all interactive buttons (excluding sound btn itself)
 document.querySelectorAll('button:not(#soundBtn), .quick-chip, .side-card, .adj-btn').forEach(el => {
   el.addEventListener('click', () => playClickSound());
+});
+
+// ── Ambient coin idle tick — subtle metallic click every ~2.5s while coin spins ──
+function playIdleTick() {
+  if (soundMuted || busy) return;
+  try {
+    const ac = getAC();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(820, ac.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(400, ac.currentTime + 0.06);
+    gain.gain.setValueAtTime(0.035, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.10);
+    osc.start(); osc.stop(ac.currentTime + 0.10);
+  } catch(e) {}
+}
+setInterval(playIdleTick, 2500);
+
+// ── Bet amount selection chime ──
+function playSelectSound() {
+  if (soundMuted) return;
+  try {
+    const ac = getAC();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(660, ac.currentTime);
+    gain.gain.setValueAtTime(0.07, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+    osc.start(); osc.stop(ac.currentTime + 0.12);
+  } catch(e) {}
+}
+document.querySelectorAll('.quick-chip, .adj-btn').forEach(el => {
+  el.addEventListener('click', playSelectSound);
 });
 
 // Auto-refresh balance
