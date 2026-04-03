@@ -48,6 +48,7 @@ const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const WALLETS_FILE  = path.join(DATA_DIR, "wallets.json");
 const PLAYERS_FILE  = path.join(DATA_DIR, "players.json");
 const RPC_CONFIG_FILE = path.join(DATA_DIR, "rpc-config.json");
+const FLIPS_FILE    = path.join(DATA_DIR, "flips.json");
 const SESSIONS      = new Map(); // token → expiry
 const isProd         = process.env.NODE_ENV === 'production';
 
@@ -205,7 +206,7 @@ function reconnect() {
 }
 
 // ── In-memory runtime data ────────────────────────────────
-const flipHistory    = [];           // all flips this session
+const flipHistory    = loadJSON(FLIPS_FILE, []);  // persisted across restarts
 const onlineSessions = new Map();    // pubkey → lastSeen timestamp
 const bannedWallets  = new Set(loadJSON(path.join(DATA_DIR, "banned.json"), []));
 let   betsPaused     = false;        // soft pause (game still "enabled" but bets rejected)
@@ -215,6 +216,20 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "public")));
+
+// ── Prelander short URLs: /l/1 → /landers/lander1.html ───
+// Usage: https://solflip.live/l/1  through  https://solflip.live/l/5
+app.get("/l/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  if (id >= 1 && id <= 5) {
+    // Preserve any query string (UTM params, ad tracking, etc.)
+    const qs = Object.keys(req.query).length
+      ? "?" + new URLSearchParams(req.query).toString()
+      : "";
+    return res.redirect(301, `/landers/lander${id}.html${qs}`);
+  }
+  res.status(404).send("Lander not found");
+});
 
 // ── Admin auth middleware ─────────────────────────────────
 function requireAdmin(req, res, next) {
@@ -488,6 +503,7 @@ app.post("/api/flip", async (req, res) => {
   };
   flipHistory.unshift(record);
   if (flipHistory.length > 500) flipHistory.pop();
+  saveJSON(FLIPS_FILE, flipHistory);  // persist so restarts don't lose history
 
   updatePlayer(playerPubkey, record);
 
